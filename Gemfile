@@ -67,5 +67,5 @@ end
 gem "devise"
 gem "pundit"
 gem "sidekiq"
-gem "tailwindcss-rails", "~> 3.3.1"
+gem "tailwindcss-rails", "~> 4.3.0"
 gem "jquery-rails"
