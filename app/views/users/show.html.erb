@@ -1,0 +1,24 @@
+<div>
+  <h1 class="font-bold text-4xl">Users#show</h1>
+  <p>Find me in app/views/users/show.html.erb</p>
+
+    <div class="border p-4 mb-4">
+      <h2 class="text-2xl font-semibold"><%= @user.first_name %> <%= @user.last_name %></h2>
+      <p class="text-2xl font-semibold"><%= @user.email %></p>
+      <p>Role: <%= @user.role %></p>
+      <p>Created at: <%= @user.created_at %></p>
+    </div>
+
+      <% if user_signed_in?%>
+      <div class="border p-4 mb-4">
+        <%= link_to 'Edit Account', edit_user_registration_path, class: "text-blue-600 hover:underline" %>
+      </div>
+       <div class="border p-4 mb-4">
+         <%= form_with url: destroy_user_session_path, method: :delete, local: true do |f| %>
+           <%= f.submit 'Log out', class: "text-blue-600 hover:underline bg-transparent border-none cursor-pointer" %>
+         <% end %>
+       </div>
+      <% end %>
+
+
+</div>

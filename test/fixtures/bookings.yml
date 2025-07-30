@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  facility: one
+  start_time: 2025-07-29 15:17:52
+  end_time: 2025-07-29 15:17:52
+  purpose: MyString
+  status: MyString
+  approved_by: one
+
+two:
+  user: two
+  facility: two
+  start_time: 2025-07-29 15:17:52
+  end_time: 2025-07-29 15:17:52
+  purpose: MyString
+  status: MyString
+  approved_by: two

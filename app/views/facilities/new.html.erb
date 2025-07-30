@@ -1,0 +1,25 @@
+<div>
+  <h1 class="font-bold text-4xl">Facilities#new</h1>
+  <p>Find me in app/views/facilities/new.html.erb</p>
+  <%= form_with model: @facility, local: true do |f| %>
+    <div class="mb-4">
+      <%= f.label :name, class: 'block text-sm font-medium text-gray-700' %>
+      <%= f.text_field :name, class: 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :description, class: 'block text-sm font-medium text-gray-700' %>
+      <%= f.text_area :description, class: 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :condo_id, "Condo", class: 'block text-sm font-medium text-gray-700' %>
+      <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, class: 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.submit 'Create Facility', class: 'inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600' %>
+    </div>
+  <% end %>
+  <p><%= link_to 'Back to Facilities', facilities_path, class: 'text blue-600 hover:underline' %></p>
+</div>

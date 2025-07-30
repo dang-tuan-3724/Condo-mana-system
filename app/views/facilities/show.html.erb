@@ -1,0 +1,30 @@
+<div>
+  <h1 class="font-bold text-4xl">Facilities#show</h1>
+  <p>Find me in app/views/facilities/show.html.erb</p>
+  <p>Name: <%= @facility.name %></p>
+  <p>Description: <%= @facility.description %></p>
+  <% if @facility.condo.present? %>
+    <p>Location: <%= @facility.condo.name %></p>
+  <% end %>
+  <% if @facility.availability_schedule.present? %>
+    <h3 class="font-semibold mt-4">Lịch sử dụng trống:</h3>
+    <table class="min-w-max table-auto border mt-2">
+      <thead>
+        <tr>
+          <th class="px-4 py-2 border">Ngày</th>
+          <th class="px-4 py-2 border">Khung giờ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @facility.availability_schedule.each do |day, time| %>
+          <tr>
+            <td class="px-4 py-2 border"><%= day %></td>
+            <td class="px-4 py-2 border"><%= time %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+  <%# <p><%= link_to 'Edit Facility', edit_facility_path(@facility), class: 'mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded'</p> %>
+  <p><%= link_to 'Back to Facilities', facilities_path, class: 'text-blue-600 hover:underline' %></p>
+</div>

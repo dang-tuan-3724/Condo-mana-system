@@ -69,3 +69,5 @@ gem "pundit"
 gem "sidekiq"
 gem "tailwindcss-rails", "~> 3.3.1"
 gem "jquery-rails"
+gem 'redis'
+gem 'cssbundling-rails'
