@@ -1,9 +1,7 @@
 <div class="space-y-8">
-  <h1 class="font-bold text-4xl">Users#index</h1>
-  <p>Find me in app/views/users/index.html.erb</p>
-
+  <h1 class="font-bold text-4xl">CMS's Members</h1>
   <div class="mb-6 flex flex-wrap gap-2">
-    <%= link_to "Tất cả", users_path, class: "px-4 py-2 rounded #{params[:condo_id].blank? ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}" %>
+    <%= link_to "All", users_path, class: "px-4 py-2 rounded #{params[:condo_id].blank? ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}" %>
     <% @condos.each do |condo| %>
       <%= link_to condo.name, users_path(condo_id: condo.id), class: "px-4 py-2 rounded #{params[:condo_id] == condo.id.to_s ? 'bg-blue-500 text-white' : 'bg-blue-200 hover:bg-blue-300'}" %>
     <% end %>
@@ -13,12 +11,12 @@
     <% selected_condo = @condos.find { |c| c.id.to_s == params[:condo_id] } %>
     <div class="mb-4 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
       <p class="text-blue-700">
-        Đang hiển thị <%= @users.count %> thành viên trong tòa: <strong><%= selected_condo&.name %></strong>
+        Showing <%= @users.count %> members in condo: <strong><%= selected_condo&.name %></strong>
       </p>
     </div>
   <% else %>
     <div class="mb-4 p-3 bg-gray-50 rounded border-2 border-blue-400">
-      <p class="text-gray-700">Đang hiển thị tất cả <%= @users.count %> thành viên</p>
+      <p class="text-gray-700">Showing all <%= @users.count %> members</p>
     </div>
   <% end %>
 
@@ -27,7 +25,9 @@
       <h1><%= user.first_name %> <%= user.last_name %></h1>
       <h2 class="text-2xl font-semibold"><%= link_to user.email, user_path(user) %></h2>
       <p>Role: <%= user.role %></p>
-      <p>Tòa: <%= user.condo&.name %></p>
+      <% if user.condo&.name %>
+          <p>Tòa: <%= user.condo&.name %></p>
+      <% end %>
         <div class="">
          <%= form_with url: user_path(user), method: :delete, local: true do |f| %>
            <%= f.submit 'Delete', class: "text-blue-600 cursor-pointer" %>

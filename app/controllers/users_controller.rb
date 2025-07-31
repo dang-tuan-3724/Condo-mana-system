@@ -3,23 +3,27 @@ class UsersController < ApplicationController
   before_action :all_condos
 
   def index
+    authorize User
+    @users = policy_scope(User)
+
     if params[:condo_id].present?
-      @users = User.where(condo_id: params[:condo_id])
-    else
-      @users = User.all
+      @users = @users.where(condo_id: params[:condo_id])
     end
   end
 
   def show
-    @user = User.find(params[:id])
+    authorize @user
   end
 
   def new
     @user = User.new
+    authorize @user
   end
 
   def create
     @user = User.new(user_params)
+    authorize @user
+
     if @user.save
       redirect_to @user, notice: "Thành viên đã được tạo thành công."
     else
@@ -28,9 +32,12 @@ class UsersController < ApplicationController
   end
 
   def edit
+    authorize @user
   end
 
   def update
+    authorize @user
+
     if @user.update(user_params)
       redirect_to @user, notice: "Thông tin thành viên đã được cập nhật."
     else
@@ -39,7 +46,8 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    @user = User.find(params[:id])
+    authorize @user
+
     flash[:success] = "User deleted"
     @user.destroy
     redirect_to users_url, notice: "Thành viên đã được xóa."

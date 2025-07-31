@@ -20,4 +20,8 @@ class User < ApplicationRecord
     record = find_by(id: id)
     record if record && record.authenticatable_salt == salt
   end
+
+  def condo_ids
+    condo_id ? [ condo_id ] : []
+  end
 end

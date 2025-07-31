@@ -5,7 +5,11 @@
     <%= link_to 'Member', users_path, style: 'color: white; text-decoration: none;' %>
     <%= link_to 'Notifications', "#", style: 'color: white; text-decoration: none;' %>
     <%= link_to 'Condo', "#", style: 'color: white; text-decoration: none;' %>
-    <%= link_to 'Bookings', "#", style: 'color: white; text-decoration: none;' %>
+
+    <% if (current_user && current_user.role == "super_admin") %>
+          <%= link_to 'Bookings', "#", style: 'color: white; text-decoration: none;' %>
+    <% end %>
+    
     <% if user_signed_in? %>
       <%= link_to 'Profile', user_path(current_user), style: 'color: white; text-decoration: none;' %>
     <% else %>

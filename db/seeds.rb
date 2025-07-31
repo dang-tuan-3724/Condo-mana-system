@@ -143,23 +143,41 @@ end
 
 # Tạo facilities
 puts "Tạo facilities..."
+
+# Tạo time slots từ 7h-21h (mỗi slot 1 tiếng)
+time_slots = []
+(7..20).each do |hour|
+  time_slots << "#{hour.to_s.rjust(2, '0')}:00-#{(hour + 1).to_s.rjust(2, '0')}:00"
+end
+
+# Schedule cho tất cả các ngày trong tuần
+availability_schedule = {
+  "monday" => time_slots,
+  "tuesday" => time_slots,
+  "wednesday" => time_slots,
+  "thursday" => time_slots,
+  "friday" => time_slots,
+  "saturday" => time_slots,
+  "sunday" => time_slots
+}
+
 facility1 = Facility.create!(
   name: "Hồ bơi",
   condo_id: condo1.id,
   description: "Hồ bơi ngoài trời tầng 5",
-  availability_schedule: { "mon-fri" => "06:00-22:00", "sat-sun" => "08:00-20:00" }
+  availability_schedule: availability_schedule
 )
 facility2 = Facility.create!(
   name: "Phòng gym",
   condo_id: condo1.id,
   description: "Phòng gym hiện đại tầng 3",
-  availability_schedule: { "mon-sun" => "05:00-23:00" }
+  availability_schedule: availability_schedule
 )
 facility3 = Facility.create!(
   name: "Sân tennis",
   condo_id: condo2.id,
   description: "Sân tennis ngoài trời",
-  availability_schedule: { "mon-sun" => "07:00-21:00" }
+  availability_schedule: availability_schedule
 )
 
 # Thêm nhiều facilities
@@ -167,13 +185,13 @@ facility4 = Facility.create!(
   name: "Khu vui chơi trẻ em",
   condo_id: condo3.id,
   description: "Khu vui chơi trong nhà tầng 2",
-  availability_schedule: { "mon-sun" => "08:00-20:00" }
+  availability_schedule: availability_schedule
 )
 facility5 = Facility.create!(
   name: "Rooftop Garden",
   condo_id: condo4.id,
   description: "Vườn trên mái với view thành phố",
-  availability_schedule: { "mon-sun" => "06:00-22:00" }
+  availability_schedule: availability_schedule
 )
 
 # Tạo bookings

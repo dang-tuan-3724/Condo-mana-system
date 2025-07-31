@@ -1,11 +1,20 @@
+
 # frozen_string_literal: true
 
+require_relative "concerns/role_helpers"
+
 class ApplicationPolicy
+  include RoleHelpers
+
   attr_reader :user, :record
 
   def initialize(user, record)
     @user = user
     @record = record
+  end
+
+  def scope
+    Pundit.policy_scope!(user, record.class)
   end
 
   def index?
@@ -37,13 +46,15 @@ class ApplicationPolicy
   end
 
   class Scope
+    include RoleHelpers
+
     def initialize(user, scope)
       @user = user
       @scope = scope
     end
 
     def resolve
-      raise NoMethodError, "You must define #resolve in #{self.class}"
+      scope.all
     end
 
     private
