@@ -1,0 +1,19 @@
+<header style="background-color: blue; color: white; padding: 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 50;">
+  <div style="display: flex; gap: 20px;">
+    <%= link_to 'Home', root_path, style: 'color: white; text-decoration: none;' %>
+    <%= link_to 'Facilities', facilities_path, style: 'color: white; text-decoration: none;' %>
+    <%= link_to 'Member', users_path, style: 'color: white; text-decoration: none;' %>
+    <%= link_to 'Notifications', "#", style: 'color: white; text-decoration: none;' %>
+    <%= link_to 'Condo', "#", style: 'color: white; text-decoration: none;' %>
+
+    <% if (current_user && current_user.role == "super_admin") %>
+          <%= link_to 'Bookings', "#", style: 'color: white; text-decoration: none;' %>
+    <% end %>
+    
+    <% if user_signed_in? %>
+      <%= link_to 'Profile', user_path(current_user), style: 'color: white; text-decoration: none;' %>
+    <% else %>
+        <%= link_to 'Login', new_user_session_path, style: 'color: white; text-decoration: none;' %>
+    <% end %>  
+    </div>
+  </header>

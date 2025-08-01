@@ -1,0 +1,46 @@
+<div>
+  <h1 class="font-bold text-4xl mb-4 flex items-center">
+    Create a new facility
+  </h1>
+
+  <%= form_with model: @facility, local: true do |f| %>
+    <div class="mb-4">
+      <%= f.label :name, class: 'block text-sm font-medium text-gray-700 flex items-center mb-2' do %>
+        <%= heroicon "tag", options: { class: "w-4 h-4 mr-2" } %>
+        Facility Name
+      <% end %>
+      <%= f.text_field :name, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :description, class: 'block text-sm font-medium text-gray-700 flex items-center mb-2' do %>
+        <%= heroicon "document-text", options: { class: "w-4 h-4 mr-2" } %>
+        Description
+      <% end %>
+      <%= f.text_area :description, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+    <div class="mb-4">
+      <%= f.label :condo_id, class: 'block text-sm font-medium text-gray-700 flex items-center mb-2' do %>
+        <%= heroicon "building-office", options: { class: "w-4 h-4 mr-2" } %>
+        Condo
+      <% end %>
+      <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, class: 'mt-1 block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+    </div>
+
+
+
+    <div class="mb-4">
+      <%= f.submit class: 'inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center' do %>
+        <%= heroicon "plus-circle", options: { class: "w-4 h-4 mr-2" } %>
+        Create Facility
+      <% end %>
+    </div>
+  <% end %>
+  <p class="text">
+    <%= link_to facilities_path, class: 'text-gray-600 hover:text-blue-600 flex items-center' do %>
+      <%= heroicon "arrow-left", options: { class: "w-4 h-4 mr-2" } %>
+      Back to Facilities
+    <% end %>
+  </p>
+</div>
