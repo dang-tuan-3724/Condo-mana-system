@@ -56,11 +56,6 @@ group :development do
   gem "web-console"
 end
 
-group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
-end
 
 
 # Used technologies
@@ -69,6 +64,19 @@ gem "pundit"
 gem "sidekiq"
 gem "tailwindcss-rails", "~> 3.3.1"
 gem "jquery-rails"
-gem 'redis'
-gem 'cssbundling-rails'
+gem "redis"
+gem "cssbundling-rails"
 gem "heroicon", "~> 1.0"
+gem "sass-embedded"
+
+group :test do
+  gem "capybara"
+  gem "selenium-webdriver"
+  gem "simplecov", require: false
+end
+
+group :development, :test do
+  gem "factory_bot_rails"
+end
+
+gem "faker"

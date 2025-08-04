@@ -1,13 +1,84 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  name: MyString
-  condo: one
-  description: MyText
-  availability_schedule: 
+vinhomes_pool:
+  name: "Hồ bơi"
+  condo: vinhomes
+  description: "Hồ bơi ngoài trời tầng 5"
+  availability_schedule:
+    monday: &monday
+      - "07:00-08:00"
+      - "08:00-09:00"
+      - "09:00-10:00"
+      - "10:00-11:00"
+      - "11:00-12:00"
+      - "12:00-13:00"
+      - "13:00-14:00"
+      - "14:00-15:00"
+      - "15:00-16:00"
+      - "16:00-17:00"
+      - "17:00-18:00"
+      - "18:00-19:00"
+      - "19:00-20:00"
+      - "20:00-21:00"
+    tuesday: *monday
+    wednesday: *monday
+    thursday: *monday
+    friday: *monday
+    saturday: *monday
+    sunday: *monday
 
-two:
-  name: MyString
-  condo: two
-  description: MyText
-  availability_schedule: 
+
+vinhomes_gym:
+  name: "Phòng gym"
+  condo: vinhomes
+  description: "Phòng gym hiện đại tầng 3"
+  availability_schedule:
+    monday: *monday
+    tuesday: *monday
+    wednesday: *monday
+    thursday: *monday
+    friday: *monday
+    saturday: *monday
+    sunday: *monday
+
+
+landmark81_tennis:
+  name: "Sân tennis"
+  condo: landmark81
+  description: "Sân tennis ngoài trời"
+  availability_schedule:
+    monday: *monday
+    tuesday: *monday
+    wednesday: *monday
+    thursday: *monday
+    friday: *monday
+    saturday: *monday
+    sunday: *monday
+
+
+sunrise_playground:
+  name: "Khu vui chơi trẻ em"
+  condo: sunrise_city
+  description: "Khu vui chơi trong nhà tầng 2"
+  availability_schedule:
+    monday: *monday
+    tuesday: *monday
+    wednesday: *monday
+    thursday: *monday
+    friday: *monday
+    saturday: *monday
+    sunday: *monday
+
+
+masteri_rooftop:
+  name: "Rooftop Garden"
+  condo: masteri
+  description: "Vườn trên mái với view thành phố"
+  availability_schedule:
+    monday: *monday
+    tuesday: *monday
+    wednesday: *monday
+    thursday: *monday
+    friday: *monday
+    saturday: *monday
+    sunday: *monday

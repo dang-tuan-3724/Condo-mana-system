@@ -1,17 +1,66 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  user: one
-  message: MyString
-  status: MyString
-  category: MyString
-  reference_id: 
-  reference_type: MyString
+# Notification 1: house_member booking hồ bơi
+swimming_request:
+  user_id: 44444444-4444-4444-4444-444444444444  # house_member
+  message: "Yêu cầu đặt chỗ hồ bơi của bạn đã được gửi."
+  status: unread
+  category: booking
+  reference_id: swimming
+  reference_type: Booking
 
-two:
-  user: two
-  message: MyString
-  status: MyString
-  category: MyString
-  reference_id: 
-  reference_type: MyString
+# Notification 2: house_member booking gym được duyệt
+gym_approved:
+  user_id: 44444444-4444-4444-4444-444444444444  # house_member
+  message: "Đặt chỗ phòng gym của bạn đã được phê duyệt."
+  status: unread
+  category: booking
+  reference_id: gym
+  reference_type: Booking
+
+# Notification 3: operation_admin nhận booking mới
+admin_new_booking:
+  user_id: 22222222-2222-2222-2222-222222222222  # operation_admin
+  message: "Có yêu cầu đặt chỗ mới từ member@example.com."
+  status: unread
+  category: admin
+  reference_id: swimming
+  reference_type: Booking
+
+# Notification test cho user1
+test1:
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+  message: "Thông báo test 1 cho user user1@example.com"
+  status: unread
+  category: booking
+  reference_id: test3
+  reference_type: Booking
+
+# Notification test cho user2
+test2:
+  user_id: 66666666-6666-6666-6666-666666666666  # user_2
+  message: "Thông báo test 2 cho user user2@example.com"
+  status: read
+  category: admin
+  reference_id: test3
+  reference_type: Booking
+
+# Notification test cho user3
+test3:
+  user_id: 77777777-7777-7777-7777-777777777777  # user_3
+  message: "Thông báo test 3 cho user user3@example.com"
+  status: unread
+  category: system
+  reference_id: test3
+  reference_type: Booking
+
+# Notification test cho user4
+test4:
+  user_id: 88888888-8888-8888-8888-888888888888  # user_4
+  message: "Thông báo test 4 cho user user4@example.com"
+  status: read
+  category: booking
+  reference_id: test3
+  reference_type: Booking
+
+# Notification test cho user5 - removed since user5 doesn't exist

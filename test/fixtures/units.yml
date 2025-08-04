@@ -1,15 +1,29 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  unit_number: MyString
-  condo: one
-  house_owner: one
+unit1:
+  unit_number: "A-101"
+  condo: vinhomes
+  house_owner_id: 33333333-3333-3333-3333-333333333333  # house_owner
   floor: 1
-  size: 9.99
+  size: 75.5
 
-two:
-  unit_number: MyString
-  condo: two
-  house_owner: two
-  floor: 1
-  size: 9.99
+unit2:
+  unit_number: "B-202"
+  condo: landmark81
+  house_owner_id: 33333333-3333-3333-3333-333333333333  # house_owner
+  floor: 2
+  size: 90.0
+
+unit3:
+  unit_number: "C-303"
+  condo: sunrise_city
+  house_owner_id: 55555555-5555-5555-5555-555555555555  # user_1
+  floor: 3
+  size: 65.0
+
+unit4:
+  unit_number: "D-404"
+  condo: masteri
+  house_owner_id: 88888888-8888-8888-8888-888888888888  # user_4
+  floor: 4
+  size: 120.0

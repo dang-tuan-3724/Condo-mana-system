@@ -1,11 +1,37 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  name: MyString
-  address: MyText
+vinhomes:
+  name: "Tòa A - Vinhomes"
+  address: "123 Nguyễn Huệ, Quận 1, TP.HCM"
   configuration: 
+    floors: 20
+    amenities:
+      - pool
+      - gym
 
-two:
-  name: MyString
-  address: MyText
-  configuration: 
+landmark81:
+  name: "Tòa B - Landmark 81"
+  address: "456 Lê Lợi, Quận 1, TP.HCM"
+  configuration:
+    floors: 30
+    amenities:
+      - tennis court
+      - bbq area
+
+sunrise_city:
+  name: "Tòa C - Sunrise City"
+  address: "789 Trần Hưng Đạo, Quận 5, TP.HCM"
+  configuration:
+    floors: 15
+    amenities:
+      - playground
+      - yoga room
+
+masteri:
+  name: "Tòa D - Masteri"
+  address: "1010 Võ Văn Kiệt, Quận 6, TP.HCM"
+  configuration:
+    floors: 25
+    amenities:
+      - cinema
+      - rooftop garden

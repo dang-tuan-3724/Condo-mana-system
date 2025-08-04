@@ -11,11 +11,11 @@
     </div>
     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-md w-full">
       <% if user_signed_in?%>
-      <div class="flex flex-row items-center gap-2 border border-blue-200 p-4 mb-4 rounded-lg w-full justify-center">
+      <div class="flex flex-row items-center gap-2 border-4 border-blue-200 p-4 mb-4 rounded-full w-full justify-center">
         <%= heroicon "pencil-square", options: { class: "w-4 h-4 mr-2 text-blue-600" } %>
         <%= link_to 'Edit Account', edit_user_registration_path, class: "text-blue-600 hover:underline" %>
       </div>
-      <div class="flex flex-row items-center gap-2 border border-blue-200 p-4 mb-4 rounded-lg w-full justify-center">
+      <div class="flex flex-row items-center gap-2 border-4 border-blue-200 p-4 mb-4 rounded-full w-full justify-center">
         <%= heroicon "minus-circle", options: { class: "w-4 h-4 mr-2 text-blue-600" } %>
          <%= form_with url: destroy_user_session_path, method: :delete, local: true do |f| %>
            <%= f.submit 'Log out', class: "text-blue-600 hover:underline bg-transparent border-none cursor-pointer" %>
