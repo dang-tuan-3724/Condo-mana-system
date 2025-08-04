@@ -1,5 +1,5 @@
-<header style="background-color: blue; color: white; padding: 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 50;">
-  <div style="display: flex; gap: 20px;">
+<header style="background-color: #1fa6db; color: white; padding: 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 50; border-radius: 50px; margin: 10px 5px 0px 5px; box-shadow: 0 4px 6px rgba(24, 85, 142, 0.35) ">
+  <div style="display: flex; gap: 20px; justify-content: center; align-items: center;">
     <%= link_to 'Home', root_path, style: 'color: white; text-decoration: none;' %>
     <%= link_to 'Facilities', facilities_path, style: 'color: white; text-decoration: none;' %>
     <%= link_to 'Member', users_path, style: 'color: white; text-decoration: none;' %>
@@ -15,5 +15,8 @@
     <% else %>
         <%= link_to 'Login', new_user_session_path, style: 'color: white; text-decoration: none;' %>
     <% end %>  
+    <p class=""><%= current_user.role if current_user  %></p> 
     </div>
+
+
   </header>

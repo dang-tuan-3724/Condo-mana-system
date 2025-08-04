@@ -1,19 +1,51 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  user: one
-  facility: one
-  start_time: 2025-07-29 15:17:52
-  end_time: 2025-07-29 15:17:52
-  purpose: MyString
-  status: MyString
-  approved_by: one
+# Booking 1: house_member đặt hồ bơi, pending
+swimming:
+  user_id: 44444444-4444-4444-4444-444444444444  # house_member
+  facility: vinhomes_pool
+  start_time: 2025-08-02 10:00:00
+  end_time: 2025-08-02 12:00:00
+  purpose: "Bơi thư giãn"
+  status: pending
+  approved_by_id:
 
-two:
-  user: two
-  facility: two
-  start_time: 2025-07-29 15:17:52
-  end_time: 2025-07-29 15:17:52
-  purpose: MyString
-  status: MyString
-  approved_by: two
+# Booking 2: user_1 đặt gym, approved bởi operation_admin
+gym:
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+  facility: vinhomes_gym
+  start_time: 2025-08-03 09:00:00
+  end_time: 2025-08-03 10:00:00
+  purpose: "Tập gym"
+  status: approved
+  approved_by_id: 22222222-2222-2222-2222-222222222222  # operation_admin
+
+# Booking test cho user1
+test1:
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+  facility: vinhomes_pool
+  start_time: 2025-08-04 08:00:00
+  end_time: 2025-08-04 09:00:00
+  purpose: "Booking test 1"
+  status: pending
+  approved_by_id:
+
+# Booking test cho user2
+test2:
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+  facility: landmark81_tennis
+  start_time: 2025-08-05 08:00:00
+  end_time: 2025-08-05 10:00:00
+  purpose: "Booking test 2"
+  status: approved
+  approved_by_id: 22222222-2222-2222-2222-222222222222  # operation_admin
+
+# Booking test cho user3
+test3:
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+  facility: sunrise_playground
+  start_time: 2025-08-06 08:00:00
+  end_time: 2025-08-06 11:00:00
+  purpose: "Booking test 3"
+  status: rejected
+  approved_by_id:

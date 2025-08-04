@@ -1,9 +1,14 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  unit: one
-  user: one
+# 3 unit_members từ seed: house_member gán vào 3 unit đầu
+unit1_member:
+  unit: unit1
+  user_id: 44444444-4444-4444-4444-444444444444  # house_member
 
-two:
-  unit: two
-  user: two
+unit2_member:
+  unit: unit2
+  user_id: 55555555-5555-5555-5555-555555555555  # user_1
+
+unit3_member:
+  unit: unit3
+  user_id: 66666666-6666-6666-6666-666666666666  # user_2
