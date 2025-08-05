@@ -1,12 +1,12 @@
 class UnitPolicy < ApplicationPolicy
   def index?
-    super_admin? || (operation_admin? && user.condo_id == record.condo_id) || (houser_owner? && user.condo_id == )
+    user.present?
   end
 
   def show?
-    super_admin? || 
-    (operation_admin? && user.condo_id == record.condo_id) || 
-    (house_owner? && record.house_owner_id == user.id) || 
+    super_admin? ||
+    (operation_admin? && user.condo_id == record.condo_id) ||
+    (house_owner? && record.house_owner_id == user.id) ||
     record.unit_members.exists?(user_id: user.id)
   end
 
@@ -26,7 +26,7 @@ class UnitPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if admin?
+      if super_admin?
         scope.all
       elsif operation_admin?
         scope.where(condo_id: user.condo_id)

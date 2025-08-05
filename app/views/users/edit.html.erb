@@ -1,8 +1,17 @@
 <div class="min-h-screen flex items-center justify-center">
   <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Chỉnh sửa thông tin người dùng</h2>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Chỉnh sửa thông tin người dùng for admin</h2>
+    <% if @user.errors.any? %>
+      <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <strong>Có lỗi xảy ra:</strong>
+        <ul class="mt-2 list-disc list-inside">
+          <% @user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
     <%= form_with model: @user, local: true, html: { class: "space-y-6" } do |f| %>
-      <%# <%= render 'shared/error_messages', object: f.object %> %>
 
       <div>
         <%= f.label :first_name, "Tên", class: "block text-sm font-medium text-gray-700" %>
@@ -20,7 +29,7 @@
       </div>
 
       <div>
-        <%= f.label :password, "Mật khẩu", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.label :password, "Mật khẩu mới (để trống nếu không đổi)", class: "block text-sm font-medium text-gray-700" %>
         <%= f.password_field :password, class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
       </div>
 
@@ -30,8 +39,73 @@
       </div>
 
       <div>
+        <%= f.label :condo_id, "Condo", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", id: "user_condo_id" } %>
+      </div>
+      
+      <div>
+        <%= f.label :unit_id, "Unit", class: "block text-sm font-medium text-gray-700" %>
+        <% current_units = @user.condo_id.present? ? Unit.where(condo_id: @user.condo_id) : [] %>
+        <% current_unit_id = @user.unit_members.first&.unit_id %>
+        <%= f.collection_select :unit_id, current_units, :id, :unit_number, 
+            { prompt: "Select Unit", selected: current_unit_id }, 
+            { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", 
+              id: "user_unit_id" } %>
+        <% if @user.unit_members.count > 1 %>
+          <p class="mt-1 text-sm text-amber-600">
+            <strong>Lưu ý:</strong> User này hiện có <%= @user.unit_members.count %> units. 
+            Chọn unit mới sẽ thay thế tất cả units hiện tại.
+          </p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= f.label :role, "Role", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.select :role, 
+            options_for_select([
+              ["Super Admin", "super_admin"],
+              ["Operation Admin", "operation_admin"],
+              ["House Owner", "house_owner"],
+              ["House Member", "house_member"]
+            ], @user.role), 
+            { prompt: "Select Role" }, 
+            { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+      </div>
+
+      <div>
         <%= f.submit "Lưu thay đổi", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
       </div>
     <% end %>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const condoSelect = document.getElementById('user_condo_id');
+  const unitSelect = document.getElementById('user_unit_id');
+  
+  condoSelect.addEventListener('change', function() {
+    const condoId = this.value;
+    
+    // Clear existing options
+    unitSelect.innerHTML = '<option value="">Select Unit</option>';
+    
+    if (condoId) {
+      // Fetch units for selected condo
+      fetch(`/units.json?condo_id=${condoId}`)
+        .then(response => response.json())
+        .then(units => {
+          units.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.id;
+            option.textContent = unit.unit_number;
+            unitSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching units:', error);
+        });
+    }
+  });
+});
+</script>

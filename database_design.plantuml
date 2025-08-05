@@ -1,0 +1,153 @@
+@startuml Condo Management System ERD
+
+' Thiết lập style
+skinparam monochrome true
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+' Bảng users
+entity "users" {
+  *id : uuid <<PK>>
+  --
+  email : string <<not null, unique>>
+  encrypted_password : string <<not null>>
+  role : string <<not null, check: IN ('super_admin', 'operation_admin', 'house_owner', 'house_member')>>
+  first_name : string
+  last_name : string
+  phone_number : string
+  condo_id : uuid <<FK, optional>>
+  reset_password_token : string <<unique>>
+  reset_password_sent_at : datetime
+  remember_created_at : datetime
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng condos
+entity "condos" {
+  *id : uuid <<PK>>
+  --
+  name : string <<not null, unique>>
+  address : text
+  configuration : jsonb <<not null, default: {}>>
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng units
+entity "units" {
+  *id : uuid <<PK>>
+  --
+  unit_number : string <<not null>>
+  condo_id : uuid <<FK, not null>>
+  house_owner_id : uuid <<FK, optional>>
+  floor : integer
+  size : decimal(10,2)
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng unit_members
+entity "unit_members" {
+  *id : uuid <<PK>>
+  --
+  unit_id : uuid <<FK, not null>>
+  user_id : uuid <<FK, not null>>
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng facilities
+entity "facilities" {
+  *id : uuid <<PK>>
+  --
+  name : string <<not null>>
+  condo_id : uuid <<FK, not null>>
+  description : text
+  availability_schedule : jsonb <<not null, default: {}>>
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng bookings
+entity "bookings" {
+  *id : uuid <<PK>>
+  --
+  user_id : uuid <<FK, not null>>
+  facility_id : uuid <<FK, not null>>
+  start_time : datetime <<not null>>
+  end_time : datetime <<not null>>
+  purpose : string
+  status : string <<not null, check: IN ('pending', 'approved', 'rejected', 'cancelled')>>
+  approved_by_id : uuid <<FK, optional>>
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Bảng notifications
+entity "notifications" {
+  *id : uuid <<PK>>
+  --
+  user_id : uuid <<FK, not null>>
+  message : string <<not null>>
+  status : string <<not null, check: IN ('unread', 'read')>>
+  category : string
+  reference_id : uuid
+  reference_type : string
+  created_at : datetime <<not null>>
+  updated_at : datetime <<not null>>
+}
+
+' Mối quan hệ
+users ||--o{ condos : condo_id
+condos ||--o{ users : condo_id
+condos ||--o{ units : condo_id
+condos ||--o{ facilities : condo_id
+users ||--o{ units : house_owner_id
+units ||--o{ unit_members : unit_id
+users ||--o{ unit_members : user_id
+users ||--o{ bookings : user_id
+users ||--o{ bookings : approved_by_id
+facilities ||--o{ bookings : facility_id
+users ||--o{ notifications : user_id
+
+' Ghi chú
+note right of users
+  - Index: email (unique)
+  - Index: reset_password_token (unique)
+  - Index: condo_id
+  - Constraint: check_user_role
+end note
+
+note right of condos
+  - Index: name (unique)
+end note
+
+note right of units
+  - Index: [condo_id, unit_number] (unique)
+  - Index: house_owner_id
+end note
+
+note right of unit_members
+  - Index: [unit_id, user_id] (unique)
+end note
+
+note right of facilities
+  - Index: [condo_id, name] (unique)
+end note
+
+note right of bookings
+  - Index: [facility_id, start_time, end_time]
+  - Constraint: check_booking_status
+end note
+
+note right of notifications
+  - Index: [reference_id, reference_type]
+  - Constraint: check_notification_status
+end note
+
+@enduml

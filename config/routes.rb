@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  get "unit_members/create"
+  get "unit_members/destroy"
+  get "units/index"
+  get "units/show"
+  get "units/new"
+  get "units/create"
+  get "units/edit"
+  get "units/update"
+  get "units/destroy"
   get "facilities/index"
   get "facilities/show"
   get "facilities/new"
@@ -16,4 +25,6 @@ Rails.application.routes.draw do
 
   resources :users, path: "members"
   resources :facilities
+  resources :units
+  resources :unit_members, only: [ :create, :destroy ]
 end
