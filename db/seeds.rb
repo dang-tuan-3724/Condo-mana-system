@@ -1,8 +1,8 @@
 # db/seeds.rb
 require 'securerandom'
 
-# Xóa toàn bộ dữ liệu hiện có để tránh trùng lặp
-puts "Xóa dữ liệu cũ..."
+# Delete all existing data to avoid duplication
+puts "Deleting old data..."
 User.delete_all
 Condo.delete_all
 Unit.delete_all
@@ -11,45 +11,45 @@ Facility.delete_all
 Booking.delete_all
 Notification.delete_all
 
-# Đặt lại sequence (nếu cần, nhưng không cần thiết với uuid)
+# Reset sequence (if needed, but not necessary with uuid)
 ActiveRecord::Base.connection.tables.each do |t|
   ActiveRecord::Base.connection.reset_pk_sequence!(t)
 end
 
-# Tạo condos
-puts "Tạo condos..."
+# Create condos
+puts "Creating condos..."
 condo1 = Condo.create!(
-  name: "Tòa A - Vinhomes",
-  address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
+  name: "Building A - Vinhomes",
+  address: "123 Nguyen Hue, District 1, HCMC",
   configuration: { "floors" => 20, "amenities" => [ "pool", "gym" ] }
 )
 condo2 = Condo.create!(
-  name: "Tòa B - Landmark 81",
-  address: "456 Lê Lợi, Quận 1, TP.HCM",
+  name: "Building B - Landmark 81",
+  address: "456 Le Loi, District 1, HCMC",
   configuration: { "floors" => 30, "amenities" => [ "tennis court", "bbq area" ] }
 )
 
-# Thêm nhiều condos
+# Add more condos
 condo3 = Condo.create!(
-  name: "Tòa C - Sunrise City",
-  address: "789 Trần Hưng Đạo, Quận 5, TP.HCM",
+  name: "Building C - Sunrise City",
+  address: "789 Tran Hung Dao, District 5, HCMC",
   configuration: { "floors" => 15, "amenities" => [ "playground", "yoga room" ] }
 )
 condo4 = Condo.create!(
-  name: "Tòa D - Masteri",
-  address: "1010 Võ Văn Kiệt, Quận 6, TP.HCM",
+  name: "Building D - Masteri",
+  address: "1010 Vo Van Kiet, District 6, HCMC",
   configuration: { "floors" => 25, "amenities" => [ "cinema", "rooftop garden" ] }
 )
 
-# Tạo users
-puts "Tạo users..."
+# Create users
+puts "Creating users..."
 super_admin = User.create!(
   email: "superadmin@example.com",
   password: "password123",
   password_confirmation: "password123",
   role: "super_admin",
-  first_name: "Quản trị",
-  last_name: "Hệ thống",
+  first_name: "System",
+  last_name: "Administrator",
   phone_number: "0901234567"
 )
 operation_admin = User.create!(
@@ -57,8 +57,8 @@ operation_admin = User.create!(
   password: "password123",
   password_confirmation: "password123",
   role: "operation_admin",
-  first_name: "Vận hành",
-  last_name: "Tòa nhà",
+  first_name: "Operation",
+  last_name: "Admin",
   phone_number: "0901234568",
   condo_id: condo1.id
 )
@@ -67,8 +67,8 @@ house_owner = User.create!(
   password: "password123",
   password_confirmation: "password123",
   role: "house_owner",
-  first_name: "Chủ",
-  last_name: "Nhà",
+  first_name: "House",
+  last_name: "Owner",
   phone_number: "0901234569",
   condo_id: condo1.id
 )
@@ -77,13 +77,13 @@ house_member = User.create!(
   password: "password123",
   password_confirmation: "password123",
   role: "house_member",
-  first_name: "Thành viên",
-  last_name: "Gia đình",
+  first_name: "Family",
+  last_name: "Member",
   phone_number: "0901234570",
   condo_id: condo2.id
 )
 
-# Thêm nhiều users
+# Add more users
 10.times do |i|
   User.create!(
     email: "user#{i+1}@example.com",
@@ -97,8 +97,8 @@ house_member = User.create!(
   )
 end
 
-# Tạo units
-puts "Tạo units..."
+# Create units
+puts "Creating units..."
 unit1 = Unit.create!(
   unit_number: "A-101",
   condo_id: condo1.id,
@@ -114,7 +114,7 @@ unit2 = Unit.create!(
   size: 90.0
 )
 
-# Thêm nhiều units
+# Add more units
 unit3 = Unit.create!(
   unit_number: "C-303",
   condo_id: condo3.id,
@@ -130,10 +130,10 @@ unit4 = Unit.create!(
   size: 120.0
 )
 
-# Tạo unit_members
-puts "Tạo unit_members..."
+# Create unit_members
+puts "Creating unit_members..."
 
-# Thêm nhiều unit_members
+# Add more unit_members
 User.where(role: "house_member").limit(3).each_with_index do |member, idx|
   UnitMember.create!(
     unit_id: [ unit1.id, unit2.id, unit3.id, unit4.id ][idx],
@@ -141,16 +141,16 @@ User.where(role: "house_member").limit(3).each_with_index do |member, idx|
   )
 end
 
-# Tạo facilities
-puts "Tạo facilities..."
+# Create facilities
+puts "Creating facilities..."
 
-# Tạo time slots từ 7h-21h (mỗi slot 1 tiếng)
+# Create time slots from 7am-9pm (each slot 1 hour)
 time_slots = []
 (7..20).each do |hour|
   time_slots << "#{hour.to_s.rjust(2, '0')}:00-#{(hour + 1).to_s.rjust(2, '0')}:00"
 end
 
-# Schedule cho tất cả các ngày trong tuần
+# Schedule for all days of the week
 availability_schedule = {
   "monday" => time_slots,
   "tuesday" => time_slots,
@@ -162,46 +162,46 @@ availability_schedule = {
 }
 
 facility1 = Facility.create!(
-  name: "Hồ bơi",
+  name: "Swimming Pool",
   condo_id: condo1.id,
-  description: "Hồ bơi ngoài trời tầng 5",
+  description: "Outdoor swimming pool on 5th floor",
   availability_schedule: availability_schedule
 )
 facility2 = Facility.create!(
-  name: "Phòng gym",
+  name: "Gym Room",
   condo_id: condo1.id,
-  description: "Phòng gym hiện đại tầng 3",
+  description: "Modern gym on 3rd floor",
   availability_schedule: availability_schedule
 )
 facility3 = Facility.create!(
-  name: "Sân tennis",
+  name: "Tennis Court",
   condo_id: condo2.id,
-  description: "Sân tennis ngoài trời",
+  description: "Outdoor tennis court",
   availability_schedule: availability_schedule
 )
 
-# Thêm nhiều facilities
+# Add more facilities
 facility4 = Facility.create!(
-  name: "Khu vui chơi trẻ em",
+  name: "Children's Playground",
   condo_id: condo3.id,
-  description: "Khu vui chơi trong nhà tầng 2",
+  description: "Indoor playground on 2nd floor",
   availability_schedule: availability_schedule
 )
 facility5 = Facility.create!(
   name: "Rooftop Garden",
   condo_id: condo4.id,
-  description: "Vườn trên mái với view thành phố",
+  description: "Rooftop garden with city view",
   availability_schedule: availability_schedule
 )
 
-# Tạo bookings
-puts "Tạo bookings..."
+# Create bookings
+puts "Creating bookings..."
 booking1 = Booking.create!(
   user_id: house_member.id,
   facility_id: facility1.id,
   start_time: Time.now + 1.day,
   end_time: Time.now + 1.day + 2.hours,
-  purpose: "Bơi thư giãn",
+  purpose: "Relaxing swim",
   status: "pending"
 )
 booking2 = Booking.create!(
@@ -209,29 +209,29 @@ booking2 = Booking.create!(
   facility_id: facility2.id,
   start_time: Time.now + 2.days,
   end_time: Time.now + 2.days + 1.hour,
-  purpose: "Tập gym",
+  purpose: "Gym workout",
   status: "approved",
   approved_by_id: operation_admin.id
 )
 
-# Thêm nhiều bookings
+# Add more bookings
 User.limit(3).each_with_index do |u, idx|
   Booking.create!(
     user_id: u.id,
     facility_id: [ facility1.id, facility2.id, facility3.id, facility4.id, facility5.id ].sample,
     start_time: Time.now + (idx+3).days,
     end_time: Time.now + (idx+3).days + (idx+1).hours,
-    purpose: "Booking test #{idx+1}",
+    purpose: "Test booking #{idx+1}",
     status: [ "pending", "approved", "rejected" ].sample,
     approved_by_id: [ operation_admin.id, nil ].sample
   )
 end
 
-# Tạo notifications
-puts "Tạo notifications..."
+# Create notifications
+puts "Creating notifications..."
 Notification.create!(
   user_id: house_member.id,
-  message: "Yêu cầu đặt chỗ hồ bơi của bạn đã được gửi.",
+  message: "Your swimming pool booking request has been sent.",
   status: "unread",
   category: "booking",
   reference_id: booking1.id,
@@ -239,7 +239,7 @@ Notification.create!(
 )
 Notification.create!(
   user_id: house_member.id,
-  message: "Đặt chỗ phòng gym của bạn đã được phê duyệt.",
+  message: "Your gym booking has been approved.",
   status: "unread",
   category: "booking",
   reference_id: booking2.id,
@@ -247,18 +247,18 @@ Notification.create!(
 )
 Notification.create!(
   user_id: operation_admin.id,
-  message: "Có yêu cầu đặt chỗ mới từ #{house_member.email}.",
+  message: "New booking request from #{house_member.email}.",
   status: "unread",
   category: "admin",
   reference_id: booking1.id,
   reference_type: "Booking"
 )
 
-# Thêm nhiều notifications
+# Add more notifications
 User.limit(5).each_with_index do |u, idx|
   Notification.create!(
     user_id: u.id,
-    message: "Thông báo test #{idx+1} cho user #{u.email}",
+    message: "Test notification #{idx+1} for user #{u.email}",
     status: [ "unread", "read" ].sample,
     category: [ "booking", "admin", "system" ].sample,
     reference_id: Booking.last.id,
@@ -266,4 +266,4 @@ User.limit(5).each_with_index do |u, idx|
   )
 end
 
-puts "Seed hoàn tất! Đã tạo dữ liệu mẫu cho Condo Management System."
+puts "Seeding complete! Sample data created for Condo Management System."

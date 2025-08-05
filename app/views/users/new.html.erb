@@ -8,7 +8,7 @@
           <div class="flex">
             <div class="ml-3">
               <h3 class="text-sm font-medium text-red-800">
-                Có <%= pluralize(@user.errors.count, "lỗi") %> cần khắc phục:
+                It's <%= pluralize(@user.errors.count, "lỗi") %> in form:
               </h3>
               <div class="mt-2 text-sm text-red-700">
                 <ul class="list-disc pl-5 space-y-1">
@@ -50,7 +50,12 @@
       
       <div>
         <%= f.label :condo_id, "Condo", class: "block text-sm font-medium text-gray-700" %>
-        <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" } %>
+        <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", id: "user_condo_id" } %>
+      </div>
+      
+      <div>
+        <%= f.label :unit_id, "Unit", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.collection_select :unit_id, [], :id, :unit_number, { prompt: "Select Unit" }, { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", id: "user_unit_id" } %>
       </div>
 
       <div>
@@ -73,3 +78,34 @@
     <% end %>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const condoSelect = document.getElementById('user_condo_id');
+  const unitSelect = document.getElementById('user_unit_id');
+  
+  condoSelect.addEventListener('change', function() {
+    const condoId = this.value;
+    
+    // Clear existing options
+    unitSelect.innerHTML = '<option value="">Select Unit</option>';
+    
+    if (condoId) {
+      // Fetch units for selected condo
+      fetch(`/units.json?condo_id=${condoId}`)
+        .then(response => response.json())
+        .then(units => {
+          units.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.id;
+            option.textContent = unit.unit_number;
+            unitSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching units:', error);
+        });
+    }
+  });
+});
+</script>

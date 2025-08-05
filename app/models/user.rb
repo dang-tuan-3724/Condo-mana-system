@@ -5,12 +5,38 @@ class User < ApplicationRecord
   belongs_to :condo, optional: true
   has_many :unit_members, dependent: :destroy
   has_many :units, foreign_key: :house_owner_id, dependent: :restrict_with_error
+  has_many :units_as_member, through: :unit_members, source: :unit
   has_many :bookings, dependent: :destroy
   has_many :notifications, dependent: :destroy
   has_many :approved_bookings, class_name: "Booking", foreign_key: :approved_by_id, dependent: :nullify
 
   validates :email, presence: true, uniqueness: true
   validates :role, inclusion: { in: %w[super_admin operation_admin house_owner house_member] }
+
+  def superadmin?
+    role == "super_admin"
+  end
+
+  def operation_admin?
+    role == "operation_admin"
+  end
+
+  def house_owner?
+    role == "house_owner"
+  end
+
+  def house_member?
+    role == "house_member"
+  end
+
+  def admin?
+    superadmin? || operation_admin?
+  end
+
+
+  def all_related_units
+    (units + units_as_member).uniq
+  end
 
   def self.serialize_into_session(record)
     [ record.id.to_s, record.authenticatable_salt ]

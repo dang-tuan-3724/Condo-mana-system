@@ -1,6 +1,6 @@
 <div class="min-h-screen flex items-center justify-center">
   <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200">
-    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Edit Account</h2>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Edit Account for user edit their own account</h2>
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "space-y-6" }) do |f| %>
       <%= render "devise/shared/error_messages", resource: resource %>
 
@@ -27,6 +27,19 @@
         <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
       </div>
 
+
+      <div>
+        <%= f.label :condo_id, "Condo", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, { class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", id: "user_condo_id" } %>
+      </div>
+      
+      <div>
+        <label for="user_unit_member_unit_id" class="block text-sm font-medium text-gray-700">Unit</label>
+        <select name="user[unit_member_unit_id]" id="user_unit_member_unit_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          <option value="">Select Unit</option>
+        </select>
+      </div>
+
       <div>
         <%= f.label :current_password, "Current password", class: "block text-sm font-medium text-gray-700" %>
         <span class="text-xs text-gray-500">(we need your current password to confirm your changes)</span>
@@ -43,3 +56,35 @@
     <%= link_to "Back", :back, class: "text-indigo-600 hover:underline text-sm" %>
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const condoSelect = document.getElementById('user_condo_id');
+  const unitSelect = document.getElementById('user_unit_member_unit_id');
+  if (!condoSelect || !unitSelect) return;
+  // Set selected unit if present
+  const selectedUnitId = '<%= resource.unit_members.first&.unit_id || "" %>';
+  if (selectedUnitId) {
+    unitSelect.value = selectedUnitId;
+  }
+  condoSelect.addEventListener('change', function() {
+    const condoId = this.value;
+    unitSelect.innerHTML = '<option value="">Select Unit</option>';
+    if (condoId) {
+      fetch(`/units.json?condo_id=${condoId}`)
+        .then(response => response.json())
+        .then(units => {
+          units.forEach(unit => {
+            const option = document.createElement('option');
+            option.value = unit.id;
+            option.textContent = unit.unit_number;
+            if (unit.id == selectedUnitId) option.selected = true;
+            unitSelect.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching units:', error);
+        });
+    }
+  });
+});
+</script>
