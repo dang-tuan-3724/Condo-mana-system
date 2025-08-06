@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_30_091524) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_05_102651) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "uuid-ossp"
@@ -48,6 +48,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_30_091524) do
     t.jsonb "availability_schedule", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "floor"
     t.index ["condo_id", "name"], name: "index_facilities_on_condo_id_and_name", unique: true
     t.index ["condo_id"], name: "index_facilities_on_condo_id"
   end

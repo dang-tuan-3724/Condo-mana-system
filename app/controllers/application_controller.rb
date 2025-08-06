@@ -4,6 +4,14 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   before_action :authenticate_user!
+  # Cho phép public trang home
+  skip_before_action :authenticate_user!, if: :public_page?
+  private
+
+  def public_page?
+    controller_name == "static_pages" && action_name == "home" ||
+    controller_name == "facilities" && action_name == "index"
+  end
   before_action :set_condos, if: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
 
@@ -18,7 +26,7 @@ class ApplicationController < ActionController::Base
   private
 
   def user_not_authorized
-    flash[:alert] = "Bạn không có quyền thực hiện hành động này."
+    flash[:alert] = "You are not authorized to this action."
     redirect_back(fallback_location: root_path)
   end
 
