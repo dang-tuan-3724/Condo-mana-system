@@ -1,6 +1,13 @@
-<div>
+<div class="max-w-3xl mx-auto p-6 ">
+  <p class="text">
+    <%= link_to facilities_path, class: 'text-gray-600 hover:text-blue-600 flex items-center' do %>
+      <%= heroicon "arrow-left", options: { class: "w-4 h-4 mr-2" } %>
+      Back to Facilities
+    <% end %>
+  </p>
+
   <h1 class="font-bold text-4xl mb-4 flex items-center">
-    Create a new facility
+    Add a new facility
   </h1>
 
   <%= form_with model: @facility, local: true do |f| %>
@@ -9,7 +16,7 @@
         <%= heroicon "tag", options: { class: "w-4 h-4 mr-2" } %>
         Facility Name
       <% end %>
-      <%= f.text_field :name, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+      <%= f.text_field :name, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2' %>
     </div>
 
     <div class="mb-4">
@@ -17,7 +24,7 @@
         <%= heroicon "document-text", options: { class: "w-4 h-4 mr-2" } %>
         Description
       <% end %>
-      <%= f.text_area :description, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
+      <%= f.text_area :description, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2' %>
     </div>
 
     <div class="mb-4">
@@ -28,19 +35,218 @@
       <%= f.collection_select :condo_id, @condos, :id, :name, { prompt: "Select Condo" }, class: 'mt-1 block w-full border p-2 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500' %>
     </div>
 
+    <div class="mb-6">
+      <h3 class="font-semibold mt-4 flex items-center">
+        <%= heroicon "calendar-days", options: { class: "w-4 h-4 mr-2 text-blue-500" } %>
+        Available time slots
+      </h3>
+      <p class="text-gray-500 text-sm mb-2">Add available time slot for this facility. You can select multiple slots.</p>
+      <div class="mb-4 flex flex-col md:flex-row gap-4 items-start">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Select day</label>
+          <input type="date" id="schedule-date" class="border rounded p-2 w-full" />
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Select available time slot</label>
+          <button type="button" id="select-all-timeslots" class="text-blue-700 flex flex-row items-center">
+            <%= heroicon "check-circle", variant: :outline, options: { class: "w-4 h-4 mr-2" } %>
+            Select All
+            </button>
+          <div id="timeslots" class="flex flex-wrap gap-2">
+            <!-- Timeslot checkboxes will be rendered by JS -->
+          </div>
+        </div>
+        <div>
+          <button type="button" id="add-schedule" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full hover:bg-blue-200 flex items-center mt-6 w-fit">
+            <%= heroicon "plus-circle", options: { class: "w-4 h-4 mr-2" } %> Add Schedule
+          </button>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Selected Schedule</label>
+        <table class="min-w-max table-auto border bg-white rounded shadow w-full" id="selected-schedule-table">
+          <thead class="bg-blue-50">
+            <tr>
+              <th class="px-4 py-2 border text-left">Day</th>
+              <th class="px-4 py-2 border text-left">Time Slots</th>
+              <th class="px-4 py-2 border"></th>
+            </tr>
+          </thead>
+          
+          <tbody id="selected-schedule-rows">
+            <!-- Rows will be added by JS -->
+          </tbody>
+        </table>
+      </div>
+      <!-- Hidden fields for submit -->
+      <div id="hidden-schedule-fields"></div>
+    </div>
+    <script>
+      // Generate timeslots from 6:00 to 23:00, each slot 1 hour
+      function generateTimeslots() {
+        const timeslots = [];
+        for (let h = 6; h < 23; h++) {
+          const start = h.toString().padStart(2, '0') + ':00';
+          const end = (h+1).toString().padStart(2, '0') + ':00';
+          timeslots.push(`${start}-${end}`);
+        }
+        return timeslots;
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        const timeslots = generateTimeslots();
+        const timeslotsDiv = document.getElementById('timeslots');
+        timeslots.forEach((slot, idx) => {
+          const label = document.createElement('label');
+          label.className = 'inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded cursor-pointer';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = slot;
+          cb.className = 'timeslot-checkbox';
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(slot));
+          timeslotsDiv.appendChild(label);
+        });
 
+        const addBtn = document.getElementById('add-schedule');
+        const dateInput = document.getElementById('schedule-date');
+        const selectedRows = document.getElementById('selected-schedule-rows');
+        const hiddenFields = document.getElementById('hidden-schedule-fields');
+
+        // Temporary data: { date1: [timeslot1, timeslot2], ... }
+        let scheduleData = {};
+
+        // If there is availability_schedule data from backend, render to table
+        <% if @facility.availability_schedule.present? %>
+          scheduleData = <%= raw @facility.availability_schedule.to_json %>;
+        <% end %>
+
+        function renderScheduleTable() {
+          selectedRows.innerHTML = '';
+          Object.keys(scheduleData).sort().forEach(date => {
+            const times = scheduleData[date];
+            if (times.length === 0) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="px-4 py-2 border align-top">${date}</td>
+              <td class="px-4 py-2 border">
+                <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 w-full">
+                  ${times.map(t => `<li class='bg-blue-100 text-blue-700 px-2 py-1 rounded text-center break-words whitespace-normal'>${t}</li>`).join('')}
+                </ul>
+              </td>
+              <td class="px-4 py-2 border text-center align-top">
+                <button type="button" class="remove-selected-row text-red-500 hover:text-red-700" data-date="${date}">&times;</button>
+              </td>
+            `;
+            selectedRows.appendChild(tr);
+          });
+        }
+
+        function renderHiddenFields() {
+          hiddenFields.innerHTML = '';
+          Object.entries(scheduleData).forEach(([date, times]) => {
+            times.forEach(time => {
+              const hiddenDay = document.createElement('input');
+              hiddenDay.type = 'hidden';
+              hiddenDay.name = 'facility[availability_schedule_days][]';
+              hiddenDay.value = date;
+              hiddenFields.appendChild(hiddenDay);
+              const hiddenTime = document.createElement('input');
+              hiddenTime.type = 'hidden';
+              hiddenTime.name = 'facility[availability_schedule_times][]';
+              hiddenTime.value = time;
+              hiddenFields.appendChild(hiddenTime);
+            });
+          });
+        }
+
+        // Render table and hidden fields on page load
+        renderScheduleTable();
+        renderHiddenFields();
+
+        addBtn.addEventListener('click', function() {
+          const date = dateInput.value;
+          if (!date) {
+            alert('Please select a day!');
+            return;
+          }
+          const checked = Array.from(document.querySelectorAll('.timeslot-checkbox:checked'));
+          if (checked.length === 0) {
+            alert('Please select at least 1 time slot!');
+            return;
+          }
+          if (!scheduleData[date]) scheduleData[date] = [];
+          checked.forEach(cb => {
+            if (!scheduleData[date].includes(cb.value)) {
+              scheduleData[date].push(cb.value);
+            }
+          });
+          renderScheduleTable();
+          renderHiddenFields();
+          checked.forEach(cb => cb.checked = false);
+        });
+
+        // Remove all timeslots of a day
+        selectedRows.addEventListener('click', function(e) {
+          if (e.target.classList.contains('remove-selected-row')) {
+            const date = e.target.getAttribute('data-date');
+            if (date && scheduleData[date]) {
+              delete scheduleData[date];
+              renderScheduleTable();
+              renderHiddenFields();
+            }
+          }
+        });
+      });
+    </script>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const addRowBtn = document.getElementById('add-row');
+        const scheduleRows = document.getElementById('schedule-rows');
+        addRowBtn.addEventListener('click', function() {
+          const newRow = document.createElement('tr');
+          newRow.innerHTML = `
+            <td class="px-2 py-2 border">
+              <input type="date" name="facility[availability_schedule_days][]" class="border rounded px-2 py-1 w-full" />
+            </td>
+            <td class="px-2 py-2 border">
+              <input type="text" name="facility[availability_schedule_times][]" placeholder="08:00-10:00" class="border rounded px-2 py-1 w-full" />
+            </td>
+            <td class="px-2 py-2 border text-center">
+              <button type="button" class="remove-row text-red-500 hover:text-red-700" title="Remove row">&times;</button>
+            </td>
+          `;
+          scheduleRows.appendChild(newRow);
+        });
+        scheduleRows.addEventListener('click', function(e) {
+          if (e.target.classList.contains('remove-row')) {
+            const row = e.target.closest('tr');
+            if (scheduleRows.children.length > 1) {
+              row.remove();
+            }
+          }
+        });
+      });
+    </script>
 
     <div class="mb-4">
       <%= f.submit class: 'inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center' do %>
         <%= heroicon "plus-circle", options: { class: "w-4 h-4 mr-2" } %>
-        Create Facility
+        Confirm Add Facility
       <% end %>
     </div>
   <% end %>
-  <p class="text">
-    <%= link_to facilities_path, class: 'text-gray-600 hover:text-blue-600 flex items-center' do %>
-      <%= heroicon "arrow-left", options: { class: "w-4 h-4 mr-2" } %>
-      Back to Facilities
-    <% end %>
-  </p>
+
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const selectAllBtn = document.getElementById('select-all-timeslots');
+    selectAllBtn.addEventListener('click', function() {
+      document.querySelectorAll('.timeslot-checkbox').forEach(cb => cb.checked = true);
+    });
+  });
+</script>

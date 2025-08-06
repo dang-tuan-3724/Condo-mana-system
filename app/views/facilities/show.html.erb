@@ -1,34 +1,59 @@
 <div>
-  <h1 class="font-bold text-4xl">Facility information</h1>
-  <p>Name: <%= @facility.name %></p>
-  <p>Description: <%= @facility.description %></p>
-  <% if @facility.condo.present? %>
-    <p>Location: <%= @facility.condo.name %></p>
-  <% end %>
-  <% if @facility.availability_schedule.present? %>
-    <h3 class="font-semibold mt-4">Lịch sử dụng trống:</h3>
-    <table class="min-w-max table-auto border mt-2 mb-4">
-      <thead>
-        <tr>
-          <th class="px-4 py-2 border">Ngày</th>
-          <th class="px-4 py-2 border">Khung giờ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @facility.availability_schedule.each do |day, time| %>
-          <tr>
-            <td class="px-4 py-2 border"><%= day %></td>
-            <td class="px-4 py-2 border"><%= time %></td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% end %>
-  <%# <p><%= link_to 'Edit Facility', edit_facility_path(@facility), class: 'mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded'</p> %>
   <p class="text">
     <%= link_to facilities_path, class: 'text-blue-600 hover:text-blue-600 flex items-center' do %>
       <%= heroicon "arrow-left", options: { class: "w-4 h-4 mr-4" } %>
       Back to Facilities
     <% end %>
   </p>
+  <h1 class="font-bold text-4xl"><%= @facility.name %></h1>
+  <% if @facility.condo.present? %>
+    <p>
+      <%= heroicon "map-pin", options: { class: "w-4 h-4 inline-block mr-2" } %>
+      <%= @facility.condo.name %>
+    </p>
+  <% end %> 
+  <% if @facility.floor.present? %>
+    <p class="flex items-center">
+      <%= heroicon "building-office-2", options: { class: "w-4 h-4 inline-block mr-2" } %>
+      Floor: <%= @facility.floor %>
+    </p>
+  <% end %>
+  <p>
+    <%= heroicon "chat-bubble-bottom-center-text", options: { class: "w-4 h-4 inline-block mr-2" } %>
+    <%= @facility.description %>
+  </p>
+
+  <p class="text">
+    <%= link_to edit_facility_path(@facility), class: 'text-blue-600 hover:text-blue-600 flex items-center' do %>
+      <%= heroicon "pencil-square", options: { class: "w-4 h-4 mr-4" } %>
+      Edit
+    <% end %>
+  </p>
+  <% if @facility.availability_schedule.present? %>
+    <h3 class="font-semibold mt-4">Available time slots:</h3>
+    <table class="min-w-max table-auto border mt-2 mb-4 w-full">
+      <thead>
+        <tr>
+          <th class="px-4 py-2 border text-left">Date</th>
+          <th class="px-4 py-2 border text-left">Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @facility.availability_schedule.each do |day, times| %>
+          <tr>
+            <td class="px-4 py-2 border align-top"><%= day %></td>
+            <td class="px-4 py-2 border">
+              <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 w-full">
+                <% Array(times).each do |t| %>
+                  <li class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-center break-words whitespace-normal w-fit"><%= t %></li>
+                <% end %>
+              </ul>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+  <%# <p><%= link_to 'Edit Facility', edit_facility_path(@facility), class: 'mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded'</p> %>
+
   </div>
