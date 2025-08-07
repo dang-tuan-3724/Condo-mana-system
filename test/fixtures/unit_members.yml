@@ -12,3 +12,16 @@ unit2_member:
 unit3_member:
   unit: unit3
   user_id: 66666666-6666-6666-6666-666666666666  # user_2
+
+# 2 user ở cùng 1 unit (unit4)
+unit4_member1:
+  unit: unit4
+  user_id: 77777777-7777-7777-7777-777777777777  # user_3
+
+unit4_member2:
+  unit: unit4
+  user_id: 88888888-8888-8888-8888-888888888888  # user_4
+
+unit4_member3:
+  unit: unit4
+  user_id: 44444444-4444-4444-4444-444444444444  # house_member

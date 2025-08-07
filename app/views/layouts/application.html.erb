@@ -26,19 +26,8 @@
 
   <body>
     <%= render 'layouts/navbar' %>
-
-    <% if alert %>
-      <p class="alert mt-24 flex flex-row justify-center items-center text-2xl text-red-600">
-        <%= heroicon "exclamation-circle", options: { class: "w-4 h-4 inline-block mr-2" } %>
-        <%= alert %>
-      </p>
-    <% end %>
-    <% if notice %>
-      <p class="alert mt-24 flex flex-row justify-center items-center text-2xl text-blue-600">
-        <%= heroicon "check-circle", options: { class: "w-4 h-4 inline-block mr-2" } %>
-        <%= notice %>
-      </p>
-    <% end %>
+    <%= render 'layouts/notice' %>
+    <%= render 'layouts/alert' %>
     <main class="container mx-auto mt-28 px-5 flex">
 
       <%= yield %>

@@ -2,7 +2,7 @@
   <h1 class="font-bold text-4xl mb-4"> All Facilities</h1>
   <h1 class="mb-4"><%= @facilities.count %> In total</h1>
   <%= form_with url: facilities_path, method: :get, local: true, class: "mb-6 border border-blue-500 rounded flex justify-between px-4 shadow-md w-full" do |f| %>
-    <input type="text" name="search" value="<%= params[:search] %>" placeholder="Search for facility by name, description or condo name" style="width: 90%;" class="rounded px-2 py-1 bg-white focus:bg-white focus:outline-none focus:ring-0 focus:border-blue-200 border border-blue-200" />
+    <input type="text" name="search" value="<%= params[:search] %>" placeholder="Search for facility by name, description or condo name" style="width: 90%;" class="rounded px-2 py-1 bg-white focus:bg-white focus:outline-none focus:ring-0 " />
     <button type="submit" class=" " >
       <%= heroicon "magnifying-glass", options: { class: "w-4 h-4 inline-block mr-2 text-blue-600" } %>
       Search
