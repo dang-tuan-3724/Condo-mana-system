@@ -5,6 +5,18 @@ class UsersController < ApplicationController
   def index
     authorize User
     @users = policy_scope(User)
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      @users = @users.left_joins(:condo)
+                     .left_joins(:units) # house_owner units
+                     .left_joins(:units_as_member) # member units
+                     .where(
+                       "users.first_name ILIKE :q OR users.last_name ILIKE :q OR users.email ILIKE :q OR condos.name ILIKE :q OR units.unit_number ILIKE :q OR units_as_members_users.unit_number ILIKE :q",
+                       q: search_term
+                     ).distinct
+    else
+      @users = @users.includes(:condo, :unit_members)
+    end
 
     if params[:condo_id].present?
       @users = @users.where(condo_id: params[:condo_id])
