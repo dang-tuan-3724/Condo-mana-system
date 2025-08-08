@@ -11,7 +11,7 @@
     <p>Member:</p>
     <ol class="list-decimal ml-6">
       <% @unit_members.each_with_index do |member, index| %>
-      <li><%= index + 1 %>. <%= member.user.first_name %> <%= member.user.last_name %></li>
+      <li><%= member.user.first_name %> <%= member.user.last_name %></li>
       <% end %>
     </ol>
     <p>Size: <%= @unit.size %></p>

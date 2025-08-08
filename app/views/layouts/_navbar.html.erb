@@ -13,7 +13,7 @@
       <i class="fa-solid fa-people-group"></i>
     <% end %>
 
-    <%= link_to "#", style: 'color: black; text-decoration: none;' do %>
+    <%= link_to condos_path, style: 'color: black; text-decoration: none;' do %>
       <i class="fa-solid fa-building"></i>
     <% end %>
     <%= link_to units_path, style: 'color: black; text-decoration: none;' do %>
@@ -22,7 +22,7 @@
 
     <%# these roles are just for admin %>
     <% if current_user && %w[super_admin admin].include?(current_user.role) %>
-          <%= link_to "#", style: 'color: black; text-decoration: none;' do %>
+          <%= link_to bookings_path, style: 'color: black; text-decoration: none;' do %>
             <i class="fa-solid fa-list-check"></i>
           <% end %>
     <% end %>

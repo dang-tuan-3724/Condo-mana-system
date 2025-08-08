@@ -1,0 +1,12 @@
+<div>
+  <%= link_to condos_path, class: "text-blue-500" do %>
+    <i class="fa-solid fa-arrow-left"></i> Back to Condos
+  <% end %>
+  <h1 class="font-bold text-4xl mb-4">Condo information</h1>
+  <div class="bg-blue-100 shadow-md mb-2 rounded p-2 border border-blue-200 mb-4">
+    <h1 class="text-2xl font-semibold"><%= @condo.name %></h1>
+    <p><span class="font-medium">Address:</span> <%= @condo.address %></p>
+    <%# Nếu có các thuộc tính khác, có thể bổ sung ở đây %>
+  </div>
+  <%= link_to "Edit Condo", edit_condo_path(@condo), class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
+</div>
