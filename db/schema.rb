@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_05_102651) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_08_033515) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "uuid-ossp"
@@ -18,15 +18,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_05_102651) do
   create_table "bookings", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "facility_id", null: false
-    t.datetime "start_time", null: false
-    t.datetime "end_time", null: false
     t.string "purpose"
     t.string "status", default: "pending", null: false
     t.uuid "approved_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "booking_time_slots", default: {}
     t.index ["approved_by_id"], name: "index_bookings_on_approved_by_id"
-    t.index ["facility_id", "start_time", "end_time"], name: "index_bookings_on_time_range"
     t.index ["facility_id"], name: "index_bookings_on_facility_id"
     t.index ["user_id"], name: "index_bookings_on_user_id"
     t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'approved'::character varying::text, 'rejected'::character varying::text, 'cancelled'::character varying::text])", name: "check_booking_status"

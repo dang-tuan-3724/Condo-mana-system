@@ -54,6 +54,266 @@
       </tbody>
     </table>
   <% end %>
+
+  <!-- Booking Form -->
+  <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+    <h3 class="font-semibold text-lg mb-4 flex items-center">
+      <%= heroicon "calendar-days", options: { class: "w-4 h-4 mr-2 text-green-500" } %>
+      Book this facility
+    </h3>
+    
+    <%= form_with url: bookings_path, method: :post, local: true, scope: :booking do |f| %>
+      <%= f.hidden_field :facility_id, value: @facility.id %>
+      
+      <div class="mb-4">
+        <%= f.label :purpose, class: 'block text-sm font-medium text-gray-700 mb-2' do %>
+          <%= heroicon "document-text", options: { class: "w-4 h-4 mr-2" } %>
+          Purpose of booking
+        <% end %>
+        <%= f.text_area :purpose, class: 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500 p-2', placeholder: 'Why do you want to book this facility?', rows: 2 %>
+      </div>
+
+      <div class="mb-6">
+        <h4 class="font-medium mb-3 flex items-center">
+          <%= heroicon "clock", options: { class: "w-4 h-4 mr-2 text-green-500" } %>
+          Select time slots to book
+        </h4>
+        <p class="text-gray-500 text-sm mb-4">Choose the date and time slots you want to book from available times.</p>
+        
+        <div class="mb-4 flex flex-col md:flex-row gap-4 items-start">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Select date</label>
+            <input type="date" id="booking-date" class="border rounded p-2 w-full" />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Select time slots</label>
+            <div id="available-timeslots" class="flex flex-wrap gap-2 mb-2">
+              <!-- Available timeslots sẽ được render bằng JS -->
+            </div>
+            <button type="button" id="select-all-booking-timeslots" class="text-green-700 flex flex-row items-center text-sm">
+              <%= heroicon "check-circle", variant: :outline, options: { class: "w-4 h-4 mr-1" } %>
+              Select All Available
+            </button>
+          </div>
+          <div>
+            <button type="button" id="add-booking-schedule" class="bg-green-500 text-white px-4 py-2 border border-green-300 rounded-full flex items-center mt-6 w-fit">
+              <%= heroicon "plus-circle", options: { class: "w-4 h-4 mr-2" } %>
+              Add to Booking
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Selected time slots for booking</label>
+          <table class="min-w-max table-auto border bg-white rounded shadow w-full" id="booking-schedule-table">
+            <thead class="bg-green-50">
+              <tr>
+                <th class="px-4 py-2 border text-left">Date</th>
+                <th class="px-4 py-2 border text-left">Time Slots</th>
+                <th class="px-4 py-2 border"></th>
+              </tr>
+            </thead>
+            <tbody id="booking-schedule-rows">
+              <!-- Các dòng sẽ được thêm bằng JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Hidden fields để submit -->
+        <div id="hidden-booking-fields"></div>
+      </div>
+
+      <div class="mb-4">
+        <button type="submit" id="submit-booking" class="inline-block bg-blue-200 text-black px-6 py-3 rounded-lg hover:bg-blue-600 flex items-center font-medium disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+          <%= heroicon "check-circle", options: { class: "w-4 h-4 mr-2" } %>
+          Confirm Create Booking Request
+        </button>
+        <p class="text-sm text-gray-500 mt-2">Make sure to select at least one time slot before submitting.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dữ liệu availability từ facility
+      const facilitySchedule = <%= raw @facility.availability_schedule.to_json %>;
+      
+      const bookingDateInput = document.getElementById('booking-date');
+      const availableTimeslotsDiv = document.getElementById('available-timeslots');
+      const selectAllBookingBtn = document.getElementById('select-all-booking-timeslots');
+      const addBookingBtn = document.getElementById('add-booking-schedule');
+      const bookingRows = document.getElementById('booking-schedule-rows');
+      const hiddenBookingFields = document.getElementById('hidden-booking-fields');
+      const submitBtn = document.getElementById('submit-booking');
+
+      // Dữ liệu booking tạm thời
+      let bookingData = {};
+
+      function updateSubmitButton() {
+        const hasBookings = Object.keys(bookingData).length > 0 && 
+                           Object.values(bookingData).some(times => times.length > 0);
+        submitBtn.disabled = !hasBookings;
+        submitBtn.classList.toggle('bg-green-500', hasBookings);
+        submitBtn.classList.toggle('hover:bg-green-600', hasBookings);
+        submitBtn.classList.toggle('bg-gray-400', !hasBookings);
+        submitBtn.classList.toggle('cursor-not-allowed', !hasBookings);
+      }
+
+      function renderAvailableTimeslots(date) {
+        availableTimeslotsDiv.innerHTML = '';
+        const availableSlots = facilitySchedule[date] || [];
+        
+        if (availableSlots.length === 0) {
+          availableTimeslotsDiv.innerHTML = '<p class="text-gray-500 text-sm">No available time slots for this date</p>';
+          return;
+        }
+
+        availableSlots.forEach(slot => {
+          const label = document.createElement('label');
+          label.className = 'inline-flex items-center gap-1 bg-green-100 px-2 py-1 rounded cursor-pointer hover:bg-green-200';
+          
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = slot;
+          cb.className = 'booking-timeslot-checkbox';
+          
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(slot));
+          availableTimeslotsDiv.appendChild(label);
+        });
+      }
+
+      function renderBookingTable() {
+        bookingRows.innerHTML = '';
+        
+        if (Object.keys(bookingData).length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td colspan="3" class="px-4 py-2 border text-center text-gray-500">No time slots selected</td>';
+          bookingRows.appendChild(tr);
+          return;
+        }
+
+        Object.keys(bookingData).sort().forEach(date => {
+          const times = bookingData[date];
+          if (times.length === 0) return;
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="px-4 py-2 border align-top">${date}</td>
+            <td class="px-4 py-2 border">
+              <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 w-full">
+                ${times.map(t => `<li class='bg-green-100 text-green-700 px-2 py-1 rounded text-center break-words whitespace-normal w-fit'>${t}</li>`).join('')}
+              </ul>
+            </td>
+            <td class="px-4 py-2 border text-center align-top">
+              <button type="button" class="remove-booking-row text-red-500 hover:text-red-700" data-date="${date}">&times;</button>
+            </td>
+          `;
+          bookingRows.appendChild(tr);
+        });
+      }
+
+      function renderHiddenBookingFields() {
+        hiddenBookingFields.innerHTML = '';
+        
+        // Tạo hidden field cho booking_time_slots dưới dạng JSON
+        const hiddenField = document.createElement('input');
+        hiddenField.type = 'hidden';
+        hiddenField.name = 'booking[booking_time_slots]';
+        hiddenField.value = JSON.stringify(bookingData);
+        hiddenBookingFields.appendChild(hiddenField);
+      }
+
+      // Event listeners
+      bookingDateInput.addEventListener('change', function() {
+        renderAvailableTimeslots(this.value);
+      });
+
+      selectAllBookingBtn.addEventListener('click', function() {
+        document.querySelectorAll('.booking-timeslot-checkbox').forEach(cb => cb.checked = true);
+      });
+
+      addBookingBtn.addEventListener('click', function() {
+        const date = bookingDateInput.value;
+        if (!date) {
+          alert('Please select a date!');
+          return;
+        }
+        
+        const checked = Array.from(document.querySelectorAll('.booking-timeslot-checkbox:checked'));
+        if (checked.length === 0) {
+          alert('Please select at least 1 time slot!');
+          return;
+        }
+        
+        if (!bookingData[date]) bookingData[date] = [];
+        
+        checked.forEach(cb => {
+          if (!bookingData[date].includes(cb.value)) {
+            bookingData[date].push(cb.value);
+          }
+        });
+        
+        renderBookingTable();
+        renderHiddenBookingFields();
+        updateSubmitButton();
+        checked.forEach(cb => cb.checked = false);
+      });
+
+      // Xóa booking schedule
+      bookingRows.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-booking-row')) {
+          const date = e.target.getAttribute('data-date');
+          if (date && bookingData[date]) {
+            delete bookingData[date];
+            renderBookingTable();
+            renderHiddenBookingFields();
+            updateSubmitButton();
+          }
+        }
+      });
+
+      // Render initial table
+      renderBookingTable();
+      updateSubmitButton();
+
+      // Form validation trước khi submit
+      const form = document.querySelector('form');
+      const purposeField = document.querySelector('#booking_purpose');
+      
+      form.addEventListener('submit', function(e) {
+        const purpose = purposeField.value.trim();
+        const hasBookings = Object.keys(bookingData).length > 0 && 
+                           Object.values(bookingData).some(times => times.length > 0);
+        
+        if (!purpose) {
+          e.preventDefault();
+          alert('Please enter the purpose of your booking.');
+          purposeField.focus();
+          return false;
+        }
+        
+        if (!hasBookings) {
+          e.preventDefault();
+          alert('Please select at least one time slot to book.');
+          return false;
+        }
+        
+        // Confirm trước khi submit
+        const confirmMessage = `Confirm creating booking request?\n\nPurpose: ${purpose}\n\nSelected time slots:\n${
+          Object.entries(bookingData).map(([date, times]) => 
+            `${date}: ${times.join(', ')}`
+          ).join('\n')
+        }`;
+        
+        if (!confirm(confirmMessage)) {
+          e.preventDefault();
+          return false;
+        }
+      });
+    });
+  </script>
+
   <%# <p><%= link_to 'Edit Facility', edit_facility_path(@facility), class: 'mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded'</p> %>
 
   </div>
