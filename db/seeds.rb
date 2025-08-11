@@ -152,13 +152,10 @@ end
 
 # Schedule for all days of the week
 availability_schedule = {
-  "monday" => time_slots,
-  "tuesday" => time_slots,
-  "wednesday" => time_slots,
-  "thursday" => time_slots,
-  "friday" => time_slots,
-  "saturday" => time_slots,
-  "sunday" => time_slots
+  "2025-08-06" => [ "06:00-07:00", "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00", "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-22:00", "22:00-23:00" ],
+  "2025-08-07" => [ "06:00-07:00", "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00", "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-22:00", "22:00-23:00" ],
+  "2025-08-08" => [ "06:00-07:00", "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00", "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-22:00", "22:00-23:00" ],
+  "2025-08-09" => [ "06:00-07:00", "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00", "18:00-19:00", "19:00-20:00", "20:00-21:00", "21:00-22:00", "22:00-23:00" ]
 }
 
 facility1 = Facility.create!(
@@ -199,28 +196,32 @@ puts "Creating bookings..."
 booking1 = Booking.create!(
   user_id: house_member.id,
   facility_id: facility1.id,
-  start_time: Time.now + 1.day,
-  end_time: Time.now + 1.day + 2.hours,
+  booking_time_slots: { "2025-08-06" => [ "07:00-08:00", "08:00-09:00" ] },
   purpose: "Relaxing swim",
   status: "pending"
 )
 booking2 = Booking.create!(
   user_id: house_member.id,
   facility_id: facility2.id,
-  start_time: Time.now + 2.days,
-  end_time: Time.now + 2.days + 1.hour,
+  booking_time_slots: { "2025-08-06" => [ "09:00-10:00", "10:00-11:00" ] },
   purpose: "Gym workout",
   status: "approved",
   approved_by_id: operation_admin.id
 )
 
-# Add more bookings
+# Add more bookings with different dates and time slots to avoid conflicts
+dates = [ "2025-08-07", "2025-08-08", "2025-08-09" ]
+time_slot_groups = [
+  [ "11:00-12:00", "12:00-13:00" ],
+  [ "13:00-14:00", "14:00-15:00" ],
+  [ "15:00-16:00", "16:00-17:00" ]
+]
+
 User.limit(3).each_with_index do |u, idx|
   Booking.create!(
     user_id: u.id,
     facility_id: [ facility1.id, facility2.id, facility3.id, facility4.id, facility5.id ].sample,
-    start_time: Time.now + (idx+3).days,
-    end_time: Time.now + (idx+3).days + (idx+1).hours,
+    booking_time_slots: { dates[idx] => time_slot_groups[idx] },
     purpose: "Test booking #{idx+1}",
     status: [ "pending", "approved", "rejected" ].sample,
     approved_by_id: [ operation_admin.id, nil ].sample

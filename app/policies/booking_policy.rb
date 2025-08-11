@@ -1,10 +1,14 @@
 class BookingPolicy < ApplicationPolicy
   def index?
-    admin?
+    user.present?
   end
 
   def show?
-    admin?
+    return true if super_admin?
+    return true if operation_admin? && user.condo_id == record.facility.condo_id
+
+    # Người dùng chỉ có thể xem booking của mình
+    user.present? && record.user_id == user.id
   end
 
   def create?
@@ -12,22 +16,28 @@ class BookingPolicy < ApplicationPolicy
   end
 
   def update?
-    admin? || (user == record.user && record.status == "pending")
+    return true if super_admin?
+    true if operation_admin? && user.condo_id == record.facility.condo_id
   end
 
   def destroy?
-    super_admin? || (user == record.user && record.status == %w["pending", "approved"])
+    return true if super_admin?
+    return true if operation_admin? && user.condo_id == record.facility.condo_id
+
+    # Người dùng chỉ có thể xem booking của mình
+    user.present? && record.user_id == user.id && record.status == %w["pending", "approved"]
   end
 
   # Define the scope for bookings
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if admin?
+      if super_admin?
         scope.all
+      elsif operation_admin?
+        scope.joins(:facility).where(facilities: { condo_id: user.condo_id })
       else
         scope.where(user_id: user.id)
       end
     end
-
   end
 end
