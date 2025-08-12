@@ -2,9 +2,16 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # database_authenticatable xác thực user qua email, password trong DB
+  # registerable dùng để user đăng ký tài khoản mới
+  # recoverable đùng để user khôi phục mật khẩu
+  # rememberable ghi nhớ thông tin đăng nhập
+  # validatable dùng để xác thực email đúng format và password đủ dài, password/confirm match.
+
   belongs_to :condo, optional: true
   has_many :unit_members, dependent: :destroy
-  has_many :units, foreign_key: :house_owner_id, dependent: :restrict_with_error
+  # has_many :units, foreign_key: :house_owner_id, dependent: :restrict_with_error
+  has_many :units, foreign_key: :house_owner_id, dependent: :destroy
   has_many :units_as_member, through: :unit_members, source: :unit
   has_many :bookings, dependent: :destroy
   has_many :notifications, dependent: :destroy

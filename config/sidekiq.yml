@@ -1,3 +1,9 @@
 :concurrency: 5
 :queues:
   - default
+  - booking
+
+:schedule:
+  booking_expiration_job:
+    cron: "0 * * * *"
+    class: "BookingExpirationJob"

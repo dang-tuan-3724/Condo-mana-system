@@ -8,6 +8,8 @@ class Booking < ApplicationRecord
   validate :validate_booking_time_slots_format
   validate :no_overlapping_bookings
   validate :booking_within_facility_hours
+  # Val xem giờ có nằm trong giờ hoạt động của fac không
+  # Chỉ validate khi tạo mới, không cần validate khi update status
 
   # Callbacks để cập nhật facility availability
   after_create :remove_time_slots_from_facility_on_create
@@ -68,7 +70,7 @@ class Booking < ApplicationRecord
 
       # Kiểm tra từng time slot có trong availability_schedule không
       time_slots.each do |time_slot|
-        unless available_slots.include?(time_slot)
+        if !available_slots.include?(time_slot)
           errors.add(:base, "Time slot '#{time_slot}' is not available on #{day}")
         end
       end
@@ -81,6 +83,7 @@ class Booking < ApplicationRecord
   end
   def remove_time_slots_from_facility
     facility_schedule = facility.availability_schedule.dup
+    # phải dùng dup để tạo một shallow copy, nếu không dùng dup thì 2 cái sẽ trỏ tới cùng 1 con pikachu ở trong bộ nhớ, nếu cái "bản sao" thay đổi thì sẽ làm con pikachu đó thay đổi. Măc dù hàm này cuối cùng cũng sẽ thay đổi pikachu trên bộ nhớ nhưng thao tác trên bản sao rồi cập nhật lên bản gốc sẽ an toàn hơn.
 
     booking_time_slots.each do |date, time_slots|
       if facility_schedule[date].present?

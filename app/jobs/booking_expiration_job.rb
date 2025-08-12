@@ -1,14 +1,14 @@
 class BookingExpirationJob < ApplicationJob
   queue_as :booking
 
-  def perform(booking_id)
-    booking = Booking.find(booking_id)
-    return nil if booking.status != "pending"
+  def perform
+    expired_bookings = Booking.pending_expired
+    return nil if expired_bookings.empty?
 
-    # Check if the booking has expired
-    if booking.created_at < 1.day.ago
-      booking.update(status: "expired")
-      # Notify the user about the expiration - implement later.
+    expired_bookings.each do |booking|
+      booking.update(status: "approved")
+      # Notify for user and admin - implement later
     end
+
   end
 end
