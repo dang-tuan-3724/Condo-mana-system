@@ -34,7 +34,7 @@ class BookingPolicy < ApplicationPolicy
       if super_admin?
         scope.all
       elsif operation_admin?
-        scope.joins(:facility).where(facilities: { condo_id: user.condo_id })
+        scope.joins(:facility).where(facilities: { condo_id: user.condo_id }).or(scope.where(user_id: user.id))
       else
         scope.where(user_id: user.id)
       end

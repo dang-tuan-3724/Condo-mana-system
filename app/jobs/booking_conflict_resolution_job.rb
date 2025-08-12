@@ -7,7 +7,7 @@ class BookingConflictResolutionJob < ApplicationJob
 
     # Re-check overlapping to handle race condition
     conflicts = []
-    booking_time_slots.each do |day, time_slots|
+    booking.booking_time_slots.each do |day, time_slots|
       time_slots.each do |time_slot|
         overlapping = Booking.where(facility_id: booking.facility_id, status: [ "approved", "pending" ])
                              .where.not(id: booking.id)
@@ -17,7 +17,8 @@ class BookingConflictResolutionJob < ApplicationJob
     end
     if conflicts.any?
       conflict = conflicts.first
-      redirect_to facilities_path, alert: "Time slot '#{conflict[:time_slot]}' on #{conflict[:day]} conflicts with an existing booking"
+      # Log conflict instead of redirect since this is a background job
+      Rails.logger.info "Booking #{booking.id} has conflicts: Time slot '#{conflict[:time_slot]}' on #{conflict[:day]} conflicts with an existing booking"
       # Notify the user about the conflict - implement later.
     else
       # Notify the admin - implement later.

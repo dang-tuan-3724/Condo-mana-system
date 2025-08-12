@@ -127,12 +127,9 @@ class UsersController < ApplicationController
   def destroy
     authorize @user
     if @user.destroy
-      flash[:success] = "Thành viên đã được xóa."
-      redirect_to users_url
+      redirect_to users_url, notice: "User was successfully deleted."
     else
-      Rails.logger.error "Failed to delete user: #{@user.errors.full_messages.join(", ")}"
-      flash[:error] = "Không thể xóa thành viên: #{@user.errors.full_messages.join(", ")}"
-      redirect_to @user
+      redirect_to @user, alert: "Không thể xóa thành viên: #{@user.errors.full_messages.join(", ")}"
     end
   end
 
