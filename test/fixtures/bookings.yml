@@ -4,8 +4,10 @@
 swimming:
   user_id: 44444444-4444-4444-4444-444444444444  # house_member
   facility: vinhomes_pool
-  start_time: 2025-08-02 10:00:00
-  end_time: 2025-08-02 12:00:00
+  booking_time_slots: 
+    2025-08-06:
+      - "07:00-08:00"
+      - "08:00-09:00"
   purpose: "Bơi thư giãn"
   status: pending
   approved_by_id:
@@ -14,8 +16,10 @@ swimming:
 gym:
   user_id: 55555555-5555-5555-5555-555555555555  # user_1
   facility: vinhomes_gym
-  start_time: 2025-08-03 09:00:00
-  end_time: 2025-08-03 10:00:00
+  booking_time_slots: 
+    2025-08-06:
+      - "07:00-08:00"
+      - "08:00-09:00"
   purpose: "Tập gym"
   status: approved
   approved_by_id: 22222222-2222-2222-2222-222222222222  # operation_admin
@@ -24,8 +28,10 @@ gym:
 test1:
   user_id: 55555555-5555-5555-5555-555555555555  # user_1
   facility: vinhomes_pool
-  start_time: 2025-08-04 08:00:00
-  end_time: 2025-08-04 09:00:00
+  booking_time_slots: 
+    2025-08-07:
+      - "07:00-08:00"
+      - "08:00-09:00"
   purpose: "Booking test 1"
   status: pending
   approved_by_id:
@@ -33,9 +39,11 @@ test1:
 # Booking test cho user2
 test2:
   user_id: 55555555-5555-5555-5555-555555555555  # user_1
-  facility: landmark81_tennis
-  start_time: 2025-08-05 08:00:00
-  end_time: 2025-08-05 10:00:00
+  facility: masteri_rooftop
+  booking_time_slots: 
+    2025-08-06:
+      - "07:00-08:00"
+      - "08:00-09:00"
   purpose: "Booking test 2"
   status: approved
   approved_by_id: 22222222-2222-2222-2222-222222222222  # operation_admin
@@ -43,9 +51,11 @@ test2:
 # Booking test cho user3
 test3:
   user_id: 55555555-5555-5555-5555-555555555555  # user_1
-  facility: sunrise_playground
-  start_time: 2025-08-06 08:00:00
-  end_time: 2025-08-06 11:00:00
+  facility: vinhomes_dinosaur_garden
+  booking_time_slots: 
+    2025-08-06:
+      - "07:00-08:00"
+      - "08:00-09:00"
   purpose: "Booking test 3"
   status: rejected
   approved_by_id:

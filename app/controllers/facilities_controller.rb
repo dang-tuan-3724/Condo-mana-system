@@ -14,7 +14,9 @@ class FacilitiesController < ApplicationController
   def create
     @facility = Facility.new(facility_params)
     @facility.availability_schedule = build_availability_schedule(params[:facility])
+
     authorize @facility
+
     if @facility.save
       redirect_to @facility, notice: "Facility was successfully created."
     else
@@ -23,6 +25,7 @@ class FacilitiesController < ApplicationController
   end
   def new
     @facility = Facility.new
+    
     authorize @facility
     @condos = Condo.all
   end
@@ -60,7 +63,10 @@ class FacilitiesController < ApplicationController
   rescue StandardError => e
     redirect_to facilities_path, alert: "An error occurred while deleting the facility: #{e.message}"
   end
+
+
   private
+  # hàm này trả về hash, active record của rails tự động chuyển từ hash sang jsonb
   def build_availability_schedule(facility_params)
     days = facility_params[:availability_schedule_days] || []
     times = facility_params[:availability_schedule_times] || []

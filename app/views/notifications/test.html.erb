@@ -1,0 +1,87 @@
+<%# Test page để debug notifications %>
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Test Notifications</h1>
+  
+  <div class="space-y-4">
+    <%= button_to "Test User Notification", test_user_notification_notifications_path, 
+        method: :post, 
+        class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+    
+    <% if current_user.admin? %>
+      <%= button_to "Test Admin Notification", test_admin_notification_notifications_path, 
+          method: :post, 
+          class: "bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+  
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Debug Info</h2>
+    <p><strong>Current User:</strong> <%= current_user.email %></p>
+    <p><strong>User ID:</strong> <%= current_user.id %></p>
+    <p><strong>Role:</strong> <%= current_user.role %></p>
+    <p><strong>Is Admin:</strong> <%= current_user.admin? %></p>
+  </div>
+  
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Manual Broadcast Test</h2>
+    <button onclick="testBroadcast()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+      Manual Test Broadcast
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import consumer from "channels/consumer";
+  
+  console.log('Test page loaded for user:', '<%= current_user.email %>');
+  
+  // Subscribe to user notifications
+  const userSubscription = consumer.subscriptions.create(
+    { channel: "NotificationChannel" },
+    {
+      connected() {
+        console.log("✅ Connected to user notification channel");
+      },
+      disconnected() {
+        console.log("❌ Disconnected from user notification channel");
+      },
+      received(data) {
+        console.log("📩 User notification received:", data);
+        alert(`User Notification: ${data.message}`);
+      }
+    }
+  );
+  
+  <% if current_user.admin? %>
+  // Subscribe to admin notifications
+  const adminSubscription = consumer.subscriptions.create(
+    { channel: "AdminNotificationChannel" },
+    {
+      connected() {
+        console.log("✅ Connected to admin notification channel");
+      },
+      disconnected() {
+        console.log("❌ Disconnected from admin notification channel");
+      },
+      received(data) {
+        console.log("📩 Admin notification received:", data);
+        alert(`Admin Notification: ${data.message}`);
+      }
+    }
+  );
+  <% end %>
+  
+  // Manual test function
+  window.testBroadcast = function() {
+    console.log('Triggering manual broadcast...');
+    fetch('/notifications/test_user_notification', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      }
+    }).then(response => {
+      console.log('Broadcast triggered');
+    });
+  };
+</script>

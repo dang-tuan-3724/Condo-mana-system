@@ -19,6 +19,7 @@ class User < ApplicationRecord
 
   validates :email, presence: true, uniqueness: true
   validates :role, inclusion: { in: %w[super_admin operation_admin house_owner house_member] }
+  validate :condo_consistency_with_units
 
   def superadmin?
     role == "super_admin"
@@ -45,8 +46,49 @@ class User < ApplicationRecord
     (units + units_as_member).uniq
   end
 
+  def debug_unit_relationships
+    {
+      id: id,
+      email: email,
+      condo_id: condo_id,
+      condo_name: condo&.name,
+      units_as_owner: units.pluck(:id, :unit_number),
+      units_as_member: units_as_member.pluck(:id, :unit_number),
+      unit_members_count: unit_members.count,
+      unit_members_details: unit_members.includes(:unit).map { |um|
+        {
+          unit_id: um.unit_id,
+          unit_number: um.unit.unit_number,
+          unit_condo_id: um.unit.condo_id
+        }
+      }
+    }
+  end
+
+  # Get all other members in the same units as this user
+  def unit_mates
+    unit_ids = all_related_units.pluck(:id)
+    return User.none if unit_ids.empty?
+
+    User.joins(:unit_members)
+        .where(unit_members: { unit_id: unit_ids })
+        .where.not(id: id)
+        .distinct
+  end
+
   def self.serialize_into_session(record)
     [ record.id.to_s, record.authenticatable_salt ]
+  end
+
+  private
+
+  def condo_consistency_with_units
+    return unless condo_id.present? && unit_members.any?
+
+    unit_condos = unit_members.joins(:unit).pluck("units.condo_id").uniq
+    if unit_condos.any? && !unit_condos.include?(condo_id)
+      errors.add(:condo_id, "must match the condo of associated units")
+    end
   end
 
   def self.serialize_from_session(id, salt)

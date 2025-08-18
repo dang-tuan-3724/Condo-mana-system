@@ -85,4 +85,104 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
 
+  # test GET edit action
+  test "super admin should get edit for any user" do
+    sign_in @super_admin
+    get edit_user_url(@house_member)
+    assert_response :success
+  end
+
+  test "operation admin should get edit their condo user" do
+    sign_in @operation_admin
+    get edit_user_url(@user)
+    assert_response :success
+  end
+
+  test "operation admin should not get edit for the user outside their condo" do
+    sign_in @operation_admin
+    get edit_user_url(@house_member)
+    assert_redirected_to root_path
+    assert_equal "You are not authorized to this action.", flash[:alert]
+  end
+
+  test "house owner should not get edit for their user" do
+    sign_in @user4
+    get edit_user_url(@house_member)
+    assert_redirected_to root_path
+    assert_equal "You are not authorized to this action.", flash[:alert]
+  end
+
+
+  # test UPDATE action
+  test "super admin should update any user" do
+    sign_in @super_admin
+    patch user_url(@house_member), params: { user: { email: "new_email@example.com" } }
+    assert_redirected_to user_url(@house_member)
+    assert_equal "User was successfully updated.", flash[:notice]
+  end
+
+  test "operation admin should update their condo user" do
+    sign_in @operation_admin
+    patch user_url(@user), params: { user: { email: "new_email@example.com" } }
+    assert_redirected_to user_url(@user)
+    assert_equal "User was successfully updated.", flash[:notice]
+  end
+
+  test "operation admin should not update for the user outside their condo" do
+    sign_in @operation_admin
+    patch user_url(@house_member), params: { user: { email: "new_email@example.com" } }
+    assert_redirected_to root_path
+    assert_equal "You are not authorized to this action.", flash[:alert]
+  end
+
+  test "house owner should not update their user" do
+    sign_in @user4
+    patch user_url(@house_member), params: { user: { email: "new_email@example.com" } }
+    assert_redirected_to root_path
+    assert_equal "You are not authorized to this action.", flash[:alert]
+  end
+
+  # test NEW, CREATE action
+  test "should create user for super admin role" do
+    sign_in @super_admin
+    assert_difference "User.count", 1 do
+      post users_url, params: { user: { email: "new_email@example.com", password: "password123", password_confirmation: "password123", role: "house_member" } }
+    end
+    assert_redirected_to user_url(User.find_by(email: "new_email@example.com"))
+  end
+  test "should not create user for operation admin role" do
+    sign_in @operation_admin
+    assert_no_difference "User.count" do
+      post users_url, params: { user: { email: "new_email@example.com", password: "password123", password_confirmation: "password123", role: "house_member" } }
+    end
+    assert_redirected_to root_path
+    assert_equal "You are not authorized to this action.", flash[:alert]
+  end
+
+  test "should get new user form for super admin role" do
+    sign_in @super_admin
+    get new_user_url
+    assert_response :success
+  end
+  test "should create user and associate with unit if unit_id is provided" do
+    sign_in @super_admin
+    unit = units(:unit1)
+    assert_difference [ "User.count", "UnitMember.count" ] do
+      post users_url, params: { user: { email: "unit_member@example.com", password: "password123", password_confirmation: "password123", role: "house_member", unit_id: unit.id } }
+    end
+    user = User.find_by(email: "unit_member@example.com")
+    assert user.unit_members.exists?(unit: unit)
+  end
+
+  test "should create house_owner and set as unit's house_owner if unit_id is provided" do
+    sign_in @super_admin
+    unit = units(:unit1)
+    condo = condos(:vinhomes)
+    assert_difference [ "User.count", "UnitMember.count" ] do
+      post users_url, params: { user: { email: "test177@example.com", password: "password123", password_confirmation: "password123", role: "house_owner", unit_id: unit.id, condo_id: condo.id } }
+    end
+    user = User.find_by(email: "test177@example.com")
+    unit.reload
+    assert_equal user, unit.house_owner
+  end
 end

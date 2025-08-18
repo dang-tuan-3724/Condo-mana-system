@@ -82,3 +82,5 @@ end
 gem "font-awesome-sass"
 
 gem "faker"
+
+gem "rails-controller-testing"

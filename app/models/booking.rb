@@ -5,6 +5,7 @@ class Booking < ApplicationRecord
 
   validates :status, inclusion: { in: %w[pending approved rejected cancelled] }
   validates :booking_time_slots, presence: true
+  validates :purpose, presence: true
   validate :validate_booking_time_slots_format
   validate :no_overlapping_bookings
   validate :booking_within_facility_hours
@@ -56,7 +57,10 @@ class Booking < ApplicationRecord
 
   def booking_within_facility_hours
     # Skip validation khi đang update booking (chỉ validate khi tạo mới)
-    return if persisted?
+
+
+
+    return if persisted? # Đã tồn tại thì không cần validate - persisted là tồn tại á
     return unless booking_time_slots.present? && facility&.availability_schedule.present?
 
     booking_time_slots.each do |day, time_slots|

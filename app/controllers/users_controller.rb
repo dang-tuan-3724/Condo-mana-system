@@ -41,25 +41,29 @@ class UsersController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @user.save
-        # Nếu có unit_id được chọn, tạo liên kết UnitMember
+        # If a unit_id is selected, create a UnitMember association
         unit_id = unit_id_param
         if unit_id.present?
           unit = Unit.find(unit_id)
+
+          # Update user's condo to match the unit's condo
+          @user.update!(condo_id: unit.condo_id)
+
           @user.unit_members.create!(unit: unit)
 
-          # Nếu role là house_owner, cập nhật house_owner_id của unit
+          # If the role is house_owner, update the house_owner_id of the unit
           if @user.role == "house_owner"
             unit.update!(house_owner: @user)
           end
         end
 
-        redirect_to @user, notice: "Thành viên đã được tạo thành công."
+        redirect_to @user, notice: "Member was successfully created."
       else
         render :new, status: :unprocessable_entity
       end
     end
   rescue ActiveRecord::RecordInvalid => e
-    @user.errors.add(:base, "Không thể liên kết với unit: #{e.message}")
+    @user.errors.add(:base, "Could not associate with unit: #{e.message}")
     render :new, status: :unprocessable_entity
   end
 
@@ -75,7 +79,7 @@ class UsersController < ApplicationController
       Rails.logger.debug "Update user params: #{params[:user]}"
       Rails.logger.debug "Unit ID param: #{unit_id_param}"
 
-      # Xử lý giữ nguyên mật khẩu nếu để trống
+      # Handle keeping the password unchanged if left blank
       filtered_params = user_params.dup
       if filtered_params[:password].blank? && filtered_params[:password_confirmation].blank?
         filtered_params.delete(:password)
@@ -83,44 +87,57 @@ class UsersController < ApplicationController
       end
 
       if @user.update(filtered_params)
-        # Xử lý thay đổi unit nếu có
+        # Handle changing unit if present
         unit_id = unit_id_param
 
         Rails.logger.debug "Processing unit_id: #{unit_id}"
 
-        # Lưu lại unit cũ để log
+        # Save old units for logging
         old_units = @user.unit_members.pluck(:unit_id)
         Rails.logger.debug "Old units: #{old_units}"
 
-        # Xóa liên kết unit cũ trước
-        @user.unit_members.destroy_all
-        # Xóa house_owner khỏi unit cũ nếu có
-        Unit.where(house_owner: @user).update_all(house_owner_id: nil)
+        # Only update unit associations if unit_id is provided and different from current
+        current_unit_id = @user.unit_members.first&.unit_id
 
-        if unit_id.present?
+        if unit_id.present? && unit_id.to_s != current_unit_id.to_s
+          # Remove old unit associations
+          @user.unit_members.destroy_all
+          # Remove house_owner from old unit if present
+          Unit.where(house_owner: @user).update_all(house_owner_id: nil)
+
           new_unit = Unit.find(unit_id)
           Rails.logger.debug "Found new unit: #{new_unit.id} - #{new_unit.unit_number}"
 
-          # Tạo liên kết unit mới
+          # Update user's condo to match the unit's condo
+          @user.update!(condo_id: new_unit.condo_id)
+
+          # Create new unit association
           @user.unit_members.create!(unit: new_unit)
 
-          # Nếu role là house_owner, cập nhật house_owner_id của unit mới
+          # If the role is house_owner, update the house_owner_id of the new unit
           if @user.role == "house_owner"
             new_unit.update!(house_owner: @user)
             Rails.logger.debug "Updated house_owner for unit #{new_unit.id}"
           end
+
+          Rails.logger.debug "Updated user condo_id to #{new_unit.condo_id} to match unit"
+        elsif unit_id.blank? && @user.unit_members.any?
+          # User explicitly wants to remove all unit associations
+          Rails.logger.debug "Removing all unit associations as unit_id is blank"
+          @user.unit_members.destroy_all
+          Unit.where(house_owner: @user).update_all(house_owner_id: nil)
         else
-          Rails.logger.debug "No unit_id provided, removed all unit associations"
+          Rails.logger.debug "No unit changes needed"
         end
 
-        redirect_to @user, notice: "Thông tin thành viên đã được cập nhật."
+        redirect_to @user, notice: "User was successfully updated."
       else
         render :edit, status: :unprocessable_entity
       end
     end
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error "Error updating user unit association: #{e.message}"
-    @user.errors.add(:base, "Không thể cập nhật liên kết với unit: #{e.message}")
+    @user.errors.add(:base, "Could not update association with unit: #{e.message}")
     render :edit, status: :unprocessable_entity
   end
 
@@ -129,7 +146,7 @@ class UsersController < ApplicationController
     if @user.destroy
       redirect_to users_url, notice: "User was successfully deleted."
     else
-      redirect_to @user, alert: "Không thể xóa thành viên: #{@user.errors.full_messages.join(", ")}"
+      redirect_to @user, alert: "Could not delete member: #{@user.errors.full_messages.join(", ")}"
     end
   end
 
@@ -138,7 +155,7 @@ class UsersController < ApplicationController
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "Không tìm thấy thành viên"
+    redirect_to root_path, alert: "Member not found"
   end
 
   def all_condos

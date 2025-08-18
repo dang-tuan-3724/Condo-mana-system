@@ -1,15 +1,16 @@
 # db/seeds.rb
 require 'securerandom'
 
-# Delete all existing data to avoid duplication
+
 puts "Deleting old data..."
-User.delete_all
-Condo.delete_all
-Unit.delete_all
-UnitMember.delete_all
-Facility.delete_all
+
 Booking.delete_all
 Notification.delete_all
+UnitMember.delete_all
+Facility.delete_all
+Unit.delete_all
+User.delete_all
+Condo.delete_all
 
 # Reset sequence (if needed, but not necessary with uuid)
 ActiveRecord::Base.connection.tables.each do |t|
