@@ -20,21 +20,34 @@
       <i class="fa-solid fa-house-user"></i>
     <% end %>
 
+    <%# Notifications for all users %>
+
+
     <%# these roles are just for admin %>
     <% if current_user && %w[super_admin operation_admin].include?(current_user.role) %>
           <%= link_to bookings_path, style: 'color: black; text-decoration: none;' do %>
             <i class="fa-solid fa-list-check"></i>
           <% end %>
     <% end %>
-    
+    <% if current_user %>
+      <%= link_to notifications_path, style: 'color: black; text-decoration: none; position: relative; display: inline-block;' do %>
+        <span class="relative inline-block">
+
+          <% unread_count = current_user.notifications.where(status: 'unread').count %>
+          <% if unread_count > 0 %>
+            <span class="absolute top-2 right-0 bg-red-500 text-white text-[6px] rounded-full h-3 w-3 flex items-center justify-center border border-white shadow p-0" style="transform: translate(40%, -40%); min-width: 16px; min-height: 16px;"> <%= unread_count %> </span>
+          <% end %>
+          <i class="fa-solid fa-bell text-xl"></i>
+        </span>
+      <% end %>
+    <% end %>
     <%# The following buttons will be displayed depending on your login status  %>
     <% if user_signed_in? %>
-      <%= link_to "#", style: 'text-black no-underline' do %>
-        <i class="fa-solid fa-comment-dots"></i>
-      <% end %>      
+      
       <%= link_to user_path(current_user), style: 'color: black; text-decoration: none;' do %>
         <i class="fa-solid fa-user"></i>
       <% end %>
+      
     <% else %>
         <%= link_to new_user_session_path, style: 'color: black; text-decoration: none;' do %>
           <i class="fa-solid fa-right-to-bracket"></i>

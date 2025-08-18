@@ -3,4 +3,5 @@ class Condo < ApplicationRecord
   has_many :units, dependent: :destroy
   has_many :facilities, dependent: :destroy
   has_many :users, dependent: :restrict_with_error
+  scope :recent_first, -> { order(created_at: :desc) }
 end

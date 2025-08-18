@@ -1,6 +1,7 @@
 require "json"
 
 class BookingsController < ApplicationController
+  include NotificationHelper
   def index
     authorize Booking
     @bookings = policy_scope(Booking)
@@ -38,7 +39,7 @@ class BookingsController < ApplicationController
     @booking.user = current_user
     @booking.status = "pending"
 
-    # Parse booking_time_slots nếu nó là string JSON
+    # Parse booking_time_slots nếu nó là string JSONB
     if @booking.booking_time_slots.is_a?(String)
       begin
         @booking.booking_time_slots = JSON.parse(@booking.booking_time_slots)
@@ -56,6 +57,22 @@ class BookingsController < ApplicationController
     if @booking.save
       # Gửi job để xử lý xung đột booking
       BookingConflictResolutionJob.perform_later(@booking.id)
+
+      # Tạo notification cho user
+      Notification.create!(
+        user: @booking.user,
+        message: "Your booking for facility ##{@booking.facility.name} was created and is pending approval.",
+        status: "unread",
+        category: "booking",
+        reference: @booking
+      )
+
+      # Broadcast notification cho user
+      Rails.logger.info "Broadcasting user notification to user #{@booking.user.id}"
+      broadcast_user_notification(@booking.user.id, "Your booking was created successfully!")
+      Rails.logger.info "Broadcasting admin notification"
+      broadcast_admin_notification("New booking requires approval from #{@booking.user.email}")
+
       redirect_to facility_path(@booking.facility), notice: "Booking request was successfully created and is pending approval."
     else
       Rails.logger.error "Booking validation errors: #{@booking.errors.full_messages}"
@@ -76,7 +93,7 @@ class BookingsController < ApplicationController
     @booking = Booking.find(params[:id])
     authorize @booking
 
-    # Handle both nested and top-level status param
+    # Handle 2 trường hợp, 1 là nằm trong params (update qua form á), 2 là nằm trong params[:status] (update chỉ trạng thái thôi)
     update_params = if params[:booking].present?
       booking_params
     elsif params[:status].present?
@@ -91,6 +108,33 @@ class BookingsController < ApplicationController
     end
 
     if @booking.update(update_params)
+      # Tạo notification cho user khi status thay đổi
+      if @booking.saved_change_to_status?
+        status_message = case @booking.status
+        when "approved"
+          "Your booking for #{@booking.facility.name} has been approved!"
+        when "rejected"
+          "Your booking for #{@booking.facility.name} has been rejected."
+        when "cancelled"
+          "Your booking for #{@booking.facility.name} has been cancelled."
+        end
+
+        if status_message
+          # Tạo notification trong database
+          Notification.create!(
+            user: @booking.user,
+            message: status_message,
+            status: "unread",
+            category: "booking",
+            reference: @booking
+          )
+
+          # Broadcast notification cho user
+          Rails.logger.info "Broadcasting status update notification to user #{@booking.user.id}"
+          broadcast_user_notification(@booking.user.id, status_message)
+        end
+      end
+
       redirect_to bookings_path, notice: "Booking was successfully updated."
     else
       Rails.logger.error "Booking update failed. Errors: #{@booking.errors.full_messages}"

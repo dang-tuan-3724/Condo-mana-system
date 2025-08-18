@@ -1,11 +1,12 @@
 Rails.application.routes.draw do
+  # notifications routes handled by resources below
 
   get "static_pages/home"
   get "up" => "rails/health#show", as: :rails_health_check
   root "static_pages#home"
   require "sidekiq/web"
   mount Sidekiq::Web => "/sidekiq"
-
+  mount ActionCable.server => "/cable"
   devise_for :users
 
   # Temporary redirect for GET sign_out requests
@@ -16,4 +17,11 @@ Rails.application.routes.draw do
   resources :units
   resources :unit_members, only: [ :create, :destroy ]
   resources :condos
+  resources :notifications do
+    collection do
+      get :test
+      post :test_user_notification
+      post :test_admin_notification
+    end
+  end
 end
