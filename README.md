@@ -1,126 +1,127 @@
+
 # Condo-mana-system
 
-Ứng dụng quản lý chung cư (Condo Management System) — một ứng dụng nội bộ để quản lý tòa nhà, căn hộ, tiện ích, đặt chỗ, và thông báo thời gian thực.
+Condo Management System — an internal application to manage buildings, apartments, facilities, bookings, and real-time notifications.
 
-## Mục tiêu
-- Cung cấp công cụ quản lý chung cư: quản lý condo, unit, tiện ích (facility), và thành viên.
-- Hệ thống đặt chỗ theo khung giờ (time slots) cho các tiện ích, với quy trình phê duyệt và giải quyết xung đột.
-- Thông báo thời gian thực cho user và admin thông qua ActionCable.
+## Goals
+- Provide tools to manage condos, units, facilities, and members.
+- Support timeslot-based bookings for facilities with approval workflow and conflict resolution.
+- Deliver real-time notifications to users and admins via ActionCable.
 
-## Những công nghệ chính được sử dụng
+## Key technologies used
 
-- Ruby on Rails 8 (backend web framework)
-- PostgreSQL (database chính)
+- Ruby on Rails 8 (web framework)
+- PostgreSQL (primary database)
 - Puma (web server)
 - Sidekiq (background jobs)
 - Redis (queue / cache / ActionCable adapter)
 - Devise (authentication)
-- Pundit (authorization / chính sách quyền truy cập)
-- Hotwire (Turbo + Stimulus) & Importmap (xây dựng trải nghiệm giao diện động nhẹ)
-- Propshaft (asset pipeline hiện đại cho Rails)
-- Tailwind CSS (thiết kế giao diện) — gem `tailwindcss-rails` và script build trong `package.json`
-- jQuery (có hỗ trợ qua `jquery-rails` cho những tương tác cũ)
-- ActionCable (websocket realtime notifications)
-- Sidekiq Web UI (mounted at `/sidekiq`) để quan sát job queue
-- Gems tiện ích/deploy: Kamal (docker deploy), Thruster (Puma optimizations), Bootsnap, Brakeman (security scan), RuboCop (linting)
-- Test & QA: RSpec/Capybara/Selenium (test automation), FactoryBot, SimpleCov
-- Icon/fonts: Heroicon, Font Awesome
+- Pundit (authorization / access policies)
+- Hotwire (Turbo + Stimulus) & Importmap (lightweight dynamic UI)
+- Propshaft (modern asset pipeline for Rails)
+- Tailwind CSS (`tailwindcss-rails`) for styling — build script in `package.json`
+- jQuery (available via `jquery-rails` for legacy interactions)
+- ActionCable (websocket-based realtime notifications)
+- Sidekiq Web UI (mounted at `/sidekiq`) for monitoring job queues
+- Utility / deploy gems: Kamal (Docker deploy), Thruster (Puma optimizations), Bootsnap, Brakeman (security scanner), RuboCop (linting)
+- Testing & QA: Capybara / Selenium, FactoryBot, SimpleCov
+- Icons / fonts: Heroicon, Font Awesome
 
-Ghi chú: các gem và script chính có thể xem trong `Gemfile` và `package.json`.
+Notes: see `Gemfile` and `package.json` for the full list of gems and scripts.
 
-## Các mô-đun / tính năng đã hiện thực
+## Implemented modules / features
 
-1. Xác thực & phân quyền
-	- Đăng ký / đăng nhập bằng `Devise`.
-	- Hệ thống vai trò: `super_admin`, `operation_admin`, `house_owner`, `house_member`.
-	- Quyền truy cập chi tiết được quản lý qua `Pundit` (các policy nằm trong `app/policies`).
+1. Authentication & authorization
+	- Registration and sign-in via `Devise`.
+	- Role system: `super_admin`, `operation_admin`, `house_owner`, `house_member`.
+	- Fine-grained access control using `Pundit` (policies in `app/policies`).
 
-2. Quản lý Condo (tòa nhà)
-	- CRUD cho `Condo` (chỉ super_admin có thể tạo, operation_admin quản lý condo của họ).
+2. Condo management
+	- CRUD for `Condo` (creation restricted to `super_admin`, `operation_admin` manages their condo).
 
-3. Quản lý Unit (căn hộ)
-	- CRUD cho `Unit`.
-	- Mỗi unit liên kết với `house_owner` (user) và nhiều `unit_members`.
-	- Hỗ trợ lọc và quyền chỉ xem sửa xóa theo role (policy trong `UnitPolicy`).
+3. Unit (apartment) management
+	- CRUD for `Unit`.
+	- Each unit has a `house_owner` (User) and many `unit_members`.
+	- Filtering and role-based access enforced by `UnitPolicy`.
 
-4. Quản lý Thành viên (Users)
-	- Tạo/ chỉnh sửa/ xóa thành viên (người có role phù hợp mới được tạo/xóa).
-	- Gán user vào condo / unit, đồng bộ condo khi gán unit.
-	- Khi thay đổi unit, cập nhật quan hệ house_owner / unit_members tương ứng.
+4. Users (members) management
+	- Create / edit / delete members (subject to role permissions).
+	- Assign users to condos/units; condo is synchronized when a unit is assigned.
+	- When a user's unit changes, related owner/member relationships are updated.
 
 5. Unit member invitations / requests
-	- House owner (hoặc admin) có thể mời user tham gia unit (tạo `UnitMemberRequest`).
-	- Recipient có thể `accept` hoặc `decline`.
-	- Khi accept sẽ tạo `UnitMember` và tạo thông báo cho cả sender & recipient.
+	- House owners (or admins) can invite users to join a unit (create `UnitMemberRequest`).
+	- Recipients can accept or decline.
+	- Accepting creates a `UnitMember` and generates notifications for sender and recipient.
 
-6. Facilities (Tiện ích tòa nhà)
-	- CRUD cho `Facility` (ví dụ: hồ bơi, phòng họp, sân thể thao).
-	- Mỗi facility có `availability_schedule` (stored as JSON/JSONB): map ngày -> danh sách time slots.
-	- Khi tạo/cập nhật facility, UI có thể cung cấp `availability_schedule_days` và `availability_schedule_times` để xây dựng lịch.
+6. Facilities
+	- CRUD for `Facility` (e.g. pool, meeting room, sports court).
+	- Each facility stores an `availability_schedule` (JSON/JSONB): map of date/day -> list of timeslots.
+	- The controller builds schedules from `availability_schedule_days` and `availability_schedule_times` passed from forms.
 
-7. Bookings (đặt chỗ theo khung giờ)
-	- Bookings lưu trữ `booking_time_slots` (hash ngày => list time slot strings).
-	- Quy trình: user tạo booking (status = `pending`) → admin/operation_admin có thể phê duyệt (`approved`) hoặc từ chối (`rejected`), hoặc user có thể hủy (`cancelled`).
-	- Validation:
-	  - Kiểm tra định dạng `booking_time_slots` (hash ngày => mảng string).
-	  - Kiểm tra booking nằm trong `availability_schedule` của facility.
-	  - Ngăn chặn xung đột: không cho phép booking trùng time slot với booking khác đang ở trạng thái `pending` hoặc `approved`.
-	- Khi tạo booking, time slots được tạm khóa (loại khỏi `availability_schedule`) để tránh xung đột.
-	- Khi booking bị hủy / từ chối / xóa, các time slots được khôi phục vào `availability_schedule`.
-	- Có `BookingConflictResolutionJob` (ActiveJob/Sidekiq) dùng để xử lý xung đột bất đồng bộ.
+7. Bookings (timeslot reservations)
+	- `Booking` stores `booking_time_slots` as a hash (date/day => list of time slot strings).
+	- Workflow: a user creates a booking (status `pending`) → admin/operation_admin may `approve` or `reject`, or the user may `cancel`.
+	- Validations:
+	  - Ensure `booking_time_slots` format is correct (hash of arrays of strings).
+	  - Verify bookings fall within the facility's `availability_schedule`.
+	  - Prevent overlaps: no bookings may claim the same timeslot when another booking is `pending` or `approved`.
+	- When a booking is created, its timeslots are temporarily removed from the facility schedule to avoid conflicts.
+	- When a booking is cancelled, rejected, or destroyed, the timeslots are restored to the facility schedule.
+	- `BookingConflictResolutionJob` (ActiveJob + Sidekiq) handles conflict resolution asynchronously.
 
-8. Notifications (Thông báo)
-	- Model `Notification` lưu thông báo (message, status: `unread`/`read`, category, reference polymorphic).
-	- Thông báo được tạo khi các sự kiện quan trọng xảy ra: tạo booking, thay đổi trạng thái booking, invite unit member, accept/decline, v.v.
-	- Real-time broadcasting via `ActionCable` (channels):
-	  - Broadcast user-specific notifications to `notifications:USER_ID`.
-	  - Broadcast admin notifications (ví dụ: thông báo admin khi có booking cần duyệt).
-	- Có các endpoint thử nghiệm: `notifications#test_user_notification` và `notifications#test_admin_notification`.
+8. Notifications
+	- `Notification` model stores messages (status `unread`/`read`, category, polymorphic reference).
+	- Notifications are created for important events: booking creation/status changes, unit invitations, accept/decline, etc.
+	- Real-time broadcasting via `ActionCable`:
+	  - User-specific notifications are broadcast to `notifications:USER_ID` channels.
+	  - Admin notifications (e.g. new booking needs approval) are broadcast to admin channels.
+	- Test endpoints available: `notifications#test_user_notification` and `notifications#test_admin_notification`.
 
 9. Background jobs & admin UI
-	- Sidekiq sử dụng cho job xử lý xung đột booking.
-	- Sidekiq Web UI mounted at `/sidekiq`.
-	- ActionCable mounted at `/cable`.
+	- Sidekiq processes background jobs (e.g. conflict resolution).
+	- Sidekiq Web UI is available at `/sidekiq`.
+	- ActionCable is mounted at `/cable` for realtime websocket connections.
 
 10. API / JSON endpoints
-	- Một số controller trả về JSON cho tìm kiếm/auto-complete (ví dụ `UnitsController#index` support JSON trả về id/unit_number).
-	- `Jbuilder` sẵn sàng phục vụ các view JSON nếu cần mở rộng API.
+	- Several controllers support JSON responses for search / autocomplete (for example, `UnitsController#index` returns id/unit_number in JSON).
+	- `Jbuilder` is included for JSON view templates if APIs are expanded.
 
 11. Health check
-	- Endpoint `GET /up` trỏ tới `rails/health#show` để health checks.
+	- A health check endpoint is available at `GET /up` which maps to `rails/health#show`.
 
-## Các model chính
-- User: quản lý người dùng, role, quan hệ với condo, unit_members.
-- Condo: tòa nhà, chứa units và facilities.
-- Unit: căn hộ, có house_owner và unit_members.
-- UnitMember / UnitMemberRequest: quan hệ thành viên và lời mời/ yêu cầu tham gia.
-- Facility: tiện ích của condo, có `availability_schedule` (JSONB).
-- Booking: đặt chỗ theo time slots, có trạng thái và callbacks để cập nhật availability.
-- Notification: lưu và phát thông báo.
+## Main models
+- User: manages user accounts, roles, and relations to condos and unit_members.
+- Condo: building entity; has many units and facilities.
+- Unit: apartment; has a house_owner and unit_members.
+- UnitMember / UnitMemberRequest: membership relations and invitation requests.
+- Facility: building facility with `availability_schedule` stored as JSONB.
+- Booking: reservation for facility timeslots with states and callbacks to update availability.
+- Notification: stores and broadcasts notifications.
 
-## Các route chính (tóm tắt)
+## Main routes (summary)
 - root: `GET /` → `static_pages#home`
-- Devise: user auth routes
+- Devise routes for authentication
 - `resources :condos`
 - `resources :units`
 - `resources :facilities`
 - `resources :bookings`
 - `resources :users, path: "members"`
-- `resources :unit_member_requests` (member: accept, decline)
+- `resources :unit_member_requests` (member routes: `accept`, `decline`)
 - `resources :unit_members` (create/destroy)
-- `resources :notifications` (test endpoints included)
-- Sidekiq Web: `/sidekiq`
-- ActionCable: `/cable`
+- `resources :notifications` (includes test endpoints)
+- Sidekiq Web UI: `/sidekiq`
+- ActionCable mount point: `/cable`
 
-## Chạy ứng dụng (phát triển) — các bước cơ bản
-1. Cài gem & node deps
+## Run the application (development) — basic steps
+1. Install gems & node dependencies
 
 ```bash
 bundle install
-yarn install # nếu cần (dựa vào package manager dự án)
+yarn install # if needed (project uses Yarn as package manager)
 ```
 
-2. Thiết lập database
+2. Setup the database
 
 ```bash
 rails db:create db:migrate db:seed
@@ -130,11 +131,11 @@ rails db:create db:migrate db:seed
 
 ```bash
 yarn build:css
-# hoặc
+# or
 rails css:build
 ```
 
-4. Chạy server & sidekiq
+4. Run the server & sidekiq
 
 ```bash
 # terminal 1
@@ -144,23 +145,25 @@ rails server
 bundle exec sidekiq
 ```
 
-5. Truy cập
+5. Access the app
 
-- Ứng dụng: http://localhost:3000
+- App: http://localhost:3000
 - Sidekiq Web UI: http://localhost:3000/sidekiq
 
-## Tài liệu & nơi cần xem mã nguồn
-- Policies (quyền): `app/policies`
+## Where to look in the codebase
+- Policies (authorization): `app/policies`
 - Controllers: `app/controllers`
 - Models: `app/models`
-- Channels / Notification helper: xem `app/javascript` và `app/helpers/notification_helper.rb` (nếu có)
+- Channels / notification helpers: check `app/javascript` and `app/helpers/notification_helper.rb` (if present)
 
-## Kiểm thử
-- Các gem test có trong `Gemfile` (Capybara, Selenium, FactoryBot, SimpleCov). Chạy test bằng:
+## Testing
+- Test-related gems are in the `Gemfile` (Capybara, Selenium, FactoryBot, SimpleCov). Run tests with:
 
 ```bash
 rails test
 ```
+
+
 
 
 
