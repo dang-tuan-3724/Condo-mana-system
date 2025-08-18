@@ -16,6 +16,12 @@ Rails.application.routes.draw do
   resources :facilities
   resources :units
   resources :unit_members, only: [ :create, :destroy ]
+  resources :unit_member_requests, only: [ :create ] do
+    member do
+      post :accept
+      post :decline
+    end
+  end
   resources :condos
   resources :notifications do
     collection do

@@ -1,0 +1,24 @@
+<% pending = UnitMemberRequest.where(recipient: current_user, status: "pending") %>
+<% if pending.any? %>
+  <div class="w-full max-w-2xl mx-auto p-4 bg-white rounded shadow">
+    <h3 class="text-lg font-semibold mb-2">Pending invitations</h3>
+    <ul class="space-y-2">
+      <% pending.each do |inv| %>
+        <li class="p-2 border rounded flex items-center justify-between">
+          <div>
+            <div class="font-medium"><%= inv.sender.first_name %> <%= inv.sender.last_name %> invited you to join Unit <%= inv.unit.unit_number %> (Condo: <%= inv.unit.condo&.name %>)</div>
+            <div class="text-sm text-gray-600">Sent at: <%= l(inv.created_at, format: :short) %></div>
+          </div>
+          <div class="flex gap-2">
+            <%= form_with url: accept_unit_member_request_path(inv), method: :post do |f| %>
+              <%= f.submit "Accept", class: "bg-green-500 text-white px-3 py-1 rounded" %>
+            <% end %>
+            <%= form_with url: decline_unit_member_request_path(inv), method: :post do |f| %>
+              <%= f.submit "Decline", class: "bg-red-500 text-white px-3 py-1 rounded" %>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

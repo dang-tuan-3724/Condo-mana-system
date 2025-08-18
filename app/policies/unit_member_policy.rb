@@ -11,4 +11,18 @@ class UnitMemberPolicy < ApplicationPolicy
     #   scope.all
     # end
   end
+
+  def create?
+    # allow admins or the house_owner of the unit to add members
+    return true if admin?
+    return false unless record.is_a?(UnitMember)
+    user&.house_owner? && record.unit&.house_owner_id == user.id
+  end
+
+  def destroy?
+    # allow admins or the house_owner of the unit to remove members
+    return true if admin?
+    return false unless record.is_a?(UnitMember)
+    user&.house_owner? && record.unit&.house_owner_id == user.id
+  end
 end
