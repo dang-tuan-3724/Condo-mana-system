@@ -46,7 +46,9 @@ class BookingsController < ApplicationController
         Rails.logger.info "Parsed booking_time_slots: #{@booking.booking_time_slots.inspect}"
       rescue JSON::ParserError => e
         Rails.logger.error "JSON parse error: #{e.message}"
-        @booking.errors.add(:booking_time_slots, "Invalid JSON format")
+  @booking.errors.add(:booking_time_slots, "Invalid JSON format")
+  # Prevent model validators that expect a Hash from raising by normalizing to nil
+  @booking.booking_time_slots = nil
       end
     end
 
@@ -75,7 +77,6 @@ class BookingsController < ApplicationController
 
       redirect_to facility_path(@booking.facility), notice: "Booking request was successfully created and is pending approval."
     else
-      Rails.logger.error "Booking validation errors: #{@booking.errors.full_messages}"
       # Lấy facility từ params nếu @booking.facility nil
       facility_id = @booking.facility_id || params[:booking][:facility_id]
       if facility_id.present?
@@ -137,9 +138,7 @@ class BookingsController < ApplicationController
 
       redirect_to bookings_path, notice: "Booking was successfully updated."
     else
-      Rails.logger.error "Booking update failed. Errors: #{@booking.errors.full_messages}"
-      Rails.logger.error "Update params: #{update_params.inspect}"
-      Rails.logger.error "Current booking status: #{@booking.status}"
+
       redirect_to bookings_path, alert: "Booking was not updated: #{@booking.errors.full_messages.join(', ')}"
     end
   end

@@ -15,7 +15,7 @@ class UnitPolicy < ApplicationPolicy
   end
 
   def update?
-    super_admin? || (operation_admin? && user.condo_id == record.condo_id)
+    super_admin? || (operation_admin? && user.condo_id == record.condo_id) || (house_owner? && record.house_owner_id == user.id)
   end
 
   def destroy?

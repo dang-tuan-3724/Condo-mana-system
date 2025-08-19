@@ -8,6 +8,10 @@ class NotificationPolicy < ApplicationPolicy
     record.user_id == user.id || user.superadmin?
   end
 
+  def create?
+    user.present?
+  end
+
   def test?
     user.present?
   end

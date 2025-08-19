@@ -1,22 +1,49 @@
-<div>
-  <%= link_to units_path, class: "text-blue-500" do %>
-    <i class="fa-solid fa-arrow-left"></i> Back to Units
-  <% end %>
-  <h1 class="font-bold text-4xl mb-4">Unit information</h1>
-  <div class="bg-blue-100 shadow-md mb-2 rounded p-2 border border-blue-200 mb-4">
-    <h1 class="text-2xl font-semibold"><%= @unit.unit_number %></h1>
-    <h2 class="">Floor: <%= @unit.floor %></h2>
-    <p>Condo: <%= @unit.condo.name if @unit.condo %></p>
-    <p>Owner: <%= @unit.house_owner.first_name if @unit.house_owner %> <%= @unit.house_owner.last_name if @unit.house_owner %></p>
-    <p>Member:</p>
-    <ol class="list-decimal ml-6">
-      <% @unit_members.each_with_index do |member, index| %>
-      <li><%= member.user.first_name %> <%= member.user.last_name %></li>
-      <% end %>
-    </ol>
-    <p>Size: <%= @unit.size %></p>
-    
+<div  ">
+  <div>
+    <%= link_to units_path, class: "text-blue-500" do %>
+      <i class="fa-solid fa-arrow-left"></i> Back to Units
+    <% end %>
+    <h1 class="font-bold text-4xl mb-4">Unit information</h1>
+    <div class="bg-blue-100 shadow-md mb-2 rounded p-2 border border-blue-200 mb-4">
+      <h1 class="text-2xl font-semibold"><%= @unit.unit_number %></h1>
+      <h2 class="">Floor: <%= @unit.floor %></h2>
+      <p>Condo: <%= @unit.condo.name if @unit.condo %></p>
+      <p>Owner: <%= @unit.house_owner.first_name if @unit.house_owner %> <%= @unit.house_owner.last_name if @unit.house_owner %></p>
+      <p>Member:</p>
+      <ol class="list-decimal ml-6">
+        <% @unit_members.each_with_index do |member, index| %>
+        <li class="flex items-center justify-between">
+          <span><%= member.user.first_name %> <%= member.user.last_name %></span>
+          <% if current_user && (current_user.admin? || (current_user.house_owner? && @unit.house_owner_id == current_user.id)) %>
+            <span>
+                <%= form_with url: unit_member_path(member), method: :delete do %>
+                  <%= button_tag type: 'submit', data: { confirm: "Remove this member from unit?" }, class: "text-red-500 p-1", aria: { label: "Remove member" } do %>
+                    <i class="fa-solid fa-xmark"></i>
+                  <% end %>
+                <% end %>
+            </span>
+          <% end %>
+        </li>
+        <% end %>
+      </ol>
+      <p>Size: <%= @unit.size %></p>    
+    </div>
+    <%= link_to "Edit Unit", edit_unit_path(@unit), class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
   </div>
-  <%= link_to "Edit Unit", edit_unit_path(@unit), class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
-  
-</div>
+    <%# Invite form for house_owner %>
+    <% if (current_user&.house_owner? && @unit.house_owner_id == current_user.id) || current_user.admin? %>
+      <div class="mt-4 p-3 border rounded bg-blue-100 drop-shadow">
+        <h3 class="font-semibold">Invite a member to this unit</h3>
+        <%= form_with url: unit_member_requests_path, method: :post do |f| %>
+          <%= hidden_field_tag :unit_id, @unit.id %>
+          <div class="mt-2">
+            <%= label_tag :recipient_id, "Select member" %>
+            <%= select_tag :recipient_id, options_from_collection_for_select(User.where.not(id: current_user.id), :id, ->(u){ "#{u.first_name} #{u.last_name} (#{u.email})" }), include_blank: "Choose...", class: "w-full  border border-blue-200 p-2 rounded-md" %>
+          </div>
+          <div class="mt-2">
+            <%= submit_tag "Send Invitation", class: "bg-blue-500 text-white px-3 py-1 rounded" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>

@@ -9,7 +9,7 @@ unit1:
 
 unit2:
   unit_number: "B-202"
-  condo: landmark81
+  condo: vinhomes
   house_owner_id: 33333333-3333-3333-3333-333333333333  # house_owner
   floor: 2
   size: 90.0

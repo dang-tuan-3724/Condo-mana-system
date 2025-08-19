@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_08_033515) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_18_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "uuid-ossp"
@@ -65,6 +65,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_033515) do
     t.check_constraint "status::text = ANY (ARRAY['unread'::character varying::text, 'read'::character varying::text])", name: "check_notification_status"
   end
 
+  create_table "unit_member_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "unit_id", null: false
+    t.uuid "sender_id", null: false
+    t.uuid "recipient_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipient_id"], name: "index_unit_member_requests_on_recipient_id"
+    t.index ["sender_id"], name: "index_unit_member_requests_on_sender_id"
+    t.index ["unit_id", "recipient_id"], name: "index_umr_on_unit_and_recipient"
+    t.index ["unit_id"], name: "index_unit_member_requests_on_unit_id"
+  end
+
   create_table "unit_members", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.uuid "unit_id", null: false
     t.uuid "user_id", null: false
@@ -112,6 +125,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_08_033515) do
   add_foreign_key "bookings", "users", column: "approved_by_id"
   add_foreign_key "facilities", "condos"
   add_foreign_key "notifications", "users"
+  add_foreign_key "unit_member_requests", "units"
+  add_foreign_key "unit_member_requests", "users", column: "recipient_id"
+  add_foreign_key "unit_member_requests", "users", column: "sender_id"
   add_foreign_key "unit_members", "units"
   add_foreign_key "unit_members", "users"
   add_foreign_key "units", "condos"

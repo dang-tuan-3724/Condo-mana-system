@@ -18,6 +18,7 @@ operation_admin:
   first_name: "Vận hành"
   last_name: "Tòa nhà"
   phone_number: "0901234568"
+  # Operation admin should manage vinhomes in tests
   condo: vinhomes
 
 house_owner:
@@ -38,7 +39,8 @@ house_member:
   first_name: "Thành viên"
   last_name: "Gia đình"
   phone_number: "0901234570"
-  condo: landmark81
+  # This member is associated with unit1 (vinhomes) and unit4 (masteri) in fixtures; set condo to masteri to be outside operation_admin's condo
+  condo: masteri
 
 user_1:
   id: 55555555-5555-5555-5555-555555555555
@@ -48,6 +50,7 @@ user_1:
   first_name: "User1"
   last_name: "Test"
   phone_number: "0901234511"
+  # user_1 is a member of unit2 but for tests should belong to vinhomes so operation_admin can manage
   condo: vinhomes
 
 user_2:
@@ -58,7 +61,8 @@ user_2:
   first_name: "User2"
   last_name: "Test"
   phone_number: "0901234512"
-  condo: landmark81
+  # user_2 is a member of unit3 (sunrise_city) in fixtures
+  condo: sunrise_city
 
 user_3:
   id: 77777777-7777-7777-7777-777777777777
@@ -68,7 +72,8 @@ user_3:
   first_name: "User3"
   last_name: "Test"
   phone_number: "0901234513"
-  condo: sunrise_city
+  # user_3 is associated with unit4 (masteri) in fixtures
+  condo: masteri
 
 user_4:
   id: 88888888-8888-8888-8888-888888888888
