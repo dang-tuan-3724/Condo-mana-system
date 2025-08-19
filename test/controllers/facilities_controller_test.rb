@@ -95,15 +95,57 @@ class FacilitiesControllerTest < ActionDispatch::IntegrationTest
   test "build_availability_schedule returns correct schedule hash" do
     controller = FacilitiesController.new
     params = {
-      availability_schedule_days: ["2025-08-12", "2025-08-12", "2025-08-13", ""],
-      availability_schedule_times: ["07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00"]
+      availability_schedule_days: [ "2025-08-12", "2025-08-12", "2025-08-13", "" ],
+      availability_schedule_times: [ "07:00-08:00", "08:00-09:00", "09:00-10:00", "10:00-11:00" ]
     }
     expected = {
-      "2025-08-12" => ["07:00-08:00", "08:00-09:00"],
-      "2025-08-13" => ["09:00-10:00"]
+      "2025-08-12" => [ "07:00-08:00", "08:00-09:00" ],
+      "2025-08-13" => [ "09:00-10:00" ]
     }
     result = controller.send(:build_availability_schedule, params)
     assert_equal expected, result
   end
 
+
+  # ...existing code...
+
+  test "destroy redirects to index with alert when facility not found" do
+    sign_in @super_admin
+    # use an id that doesn't exist
+    delete facility_url(999_999)
+    assert_redirected_to facilities_url
+    follow_redirect!
+    assert_equal "Facility not found.", flash[:alert]
+  end
+
+  test "destroy redirects to index with unauthorized alert when user not allowed" do
+    # operation_admin is not allowed to destroy (policy#destroy? only super_admin)
+    sign_in @operation_admin
+    facility = Facility.create!(name: "Protected Facility", condo: @condo)
+    delete facility_url(facility)
+    assert_redirected_to facilities_url
+    follow_redirect!
+    assert_equal "You are not authorized to delete this facility.", flash[:alert]
+    # facility must still exist
+    assert Facility.exists?(facility.id)
+  end
+
+  test "destroy rescues StandardError and shows message" do
+    sign_in @super_admin
+    facility = Facility.create!(name: "Error Facility", condo: @condo)
+    # temporarily override Facility.find to raise StandardError so the controller's StandardError rescue is exercised
+    original_find = Facility.method(:find)
+    Facility.define_singleton_method(:find) do |*args|
+      raise StandardError.new("boom")
+    end
+    begin
+      delete facility_url(facility.id)
+    ensure
+      Facility.define_singleton_method(:find) { |*a| original_find.call(*a) }
+    end
+
+    assert_redirected_to facilities_url
+    follow_redirect!
+    assert_equal "An error occurred while deleting the facility: boom", flash[:alert]
+  end
 end

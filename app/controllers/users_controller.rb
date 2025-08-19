@@ -76,8 +76,7 @@ class UsersController < ApplicationController
 
     ActiveRecord::Base.transaction do
       # Debug logging
-      Rails.logger.debug "Update user params: #{params[:user]}"
-      Rails.logger.debug "Unit ID param: #{unit_id_param}"
+
 
       # Handle keeping the password unchanged if left blank
       filtered_params = user_params.dup
@@ -90,11 +89,7 @@ class UsersController < ApplicationController
         # Handle changing unit if present
         unit_id = unit_id_param
 
-        Rails.logger.debug "Processing unit_id: #{unit_id}"
 
-        # Save old units for logging
-        old_units = @user.unit_members.pluck(:unit_id)
-        Rails.logger.debug "Old units: #{old_units}"
 
         # Only update unit associations if unit_id is provided and different from current
         current_unit_id = @user.unit_members.first&.unit_id
@@ -106,7 +101,6 @@ class UsersController < ApplicationController
           Unit.where(house_owner: @user).update_all(house_owner_id: nil)
 
           new_unit = Unit.find(unit_id)
-          Rails.logger.debug "Found new unit: #{new_unit.id} - #{new_unit.unit_number}"
 
           # Update user's condo to match the unit's condo
           @user.update!(condo_id: new_unit.condo_id)
@@ -117,17 +111,13 @@ class UsersController < ApplicationController
           # If the role is house_owner, update the house_owner_id of the new unit
           if @user.role == "house_owner"
             new_unit.update!(house_owner: @user)
-            Rails.logger.debug "Updated house_owner for unit #{new_unit.id}"
           end
 
-          Rails.logger.debug "Updated user condo_id to #{new_unit.condo_id} to match unit"
         elsif unit_id.blank? && @user.unit_members.any?
           # User explicitly wants to remove all unit associations
-          Rails.logger.debug "Removing all unit associations as unit_id is blank"
           @user.unit_members.destroy_all
           Unit.where(house_owner: @user).update_all(house_owner_id: nil)
-        else
-          Rails.logger.debug "No unit changes needed"
+
         end
 
         redirect_to @user, notice: "User was successfully updated."

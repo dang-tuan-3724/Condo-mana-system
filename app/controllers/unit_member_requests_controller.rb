@@ -17,6 +17,7 @@ class UnitMemberRequestsController < ApplicationController
       return redirect_to @unit, alert: "Recipient not found"
     end
 
+    # unit member request
     umr = UnitMemberRequest.new(unit: @unit, sender: current_user, recipient: recipient)
     if umr.save
       redirect_to @unit, notice: "Invitation sent to #{recipient.first_name} #{recipient.last_name}"

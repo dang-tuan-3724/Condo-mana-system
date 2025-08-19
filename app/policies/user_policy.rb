@@ -23,7 +23,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def update?
-    super_admin? || user == record || (operation_admin? && user.condo_ids.include?(record.condo_id))
+    super_admin? || user == record || (operation_admin? && user.condo_id == record.condo_id)
   end
 
   def destroy?

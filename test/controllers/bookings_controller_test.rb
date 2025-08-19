@@ -56,4 +56,57 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to facility_url(@vinhomes_pool)
   end
 
+  test "create failure with invalid JSON booking_time_slots redirects to facility when facility_id present" do
+    sign_in @user
+    # Provide invalid JSON string to trigger JSON::ParserError and ensure controller redirects to facility_path
+    post bookings_url, params: { booking: { facility_id: @vinhomes_pool.id, purpose: "x", booking_time_slots: '{"2025-08-06": ["09:00-10:00"]' } }
+
+  assert_redirected_to facility_path(@vinhomes_pool)
+  # When JSON parse fails we normalize booking_time_slots to nil, model validation adds presence error
+  assert_match Regexp.new("Booking time slots can't be blank"), flash[:alert].to_s
+  end
+
+  test "create failure with invalid JSON booking_time_slots and no facility redirects to facilities index" do
+    sign_in @user
+    post bookings_url, params: { booking: { purpose: "x", booking_time_slots: "not a json" } }
+
+  assert_redirected_to facilities_path
+  # Expect facility existence + booking_time_slots presence errors when no facility provided
+  assert_match Regexp.new("Facility must exist|Booking time slots can't be blank"), flash[:alert].to_s
+  end
+
+  test "index search param performs joins and returns matching results" do
+    sign_in @super_admin
+    get bookings_url, params: { search: "Hồ bơi" }
+    assert_response :success
+  # Expect the facility name to appear in the rendered response
+  assert_match Regexp.new("Hồ bơi"), @response.body
+  end
+
+  test "index day param filters bookings and exercises array branch" do
+    sign_in @super_admin
+    get bookings_url, params: { day: "2025-08-06" }
+    assert_response :success
+  # swimming fixture has booking_time_slots for 2025-08-06 with purpose "Bơi thư giãn"
+  assert_match Regexp.new("Bơi thư giãn"), @response.body
+  end
+
+  test "update via params[:status] sets approved_by and status" do
+    sign_in @super_admin
+    patch booking_url(@booking), params: { status: "approved" }
+    assert_redirected_to bookings_url
+    @booking.reload
+    assert_equal "approved", @booking.status
+    assert_equal @super_admin.id, @booking.approved_by_id
+  end
+
+  test "update failure redirects with alert when invalid booking params" do
+    sign_in @super_admin
+    # Send invalid params (missing purpose) to make update fail validation
+    patch booking_url(@booking), params: { booking: { purpose: "" } }
+
+  assert_redirected_to bookings_path
+  # Expect purpose presence validation message
+  assert_match Regexp.new("Purpose can't be blank"), flash[:alert].to_s
+  end
 end
